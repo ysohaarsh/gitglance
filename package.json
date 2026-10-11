@@ -1,0 +1,24 @@
+{
+  "name": "gitglance",
+  "version": "0.1.0",
+  "description": "Analyze git repositories: activity stats, health checks, changelogs and AI summaries",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "gitglance": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.0"
+  }
+}

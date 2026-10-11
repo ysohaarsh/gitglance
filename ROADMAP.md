@@ -3,7 +3,7 @@
 Tasks are done top to bottom, one per day. Edit freely to steer the project.
 
 ## Phase 1: Foundation
-- [ ] Set up TypeScript project: package.json, tsconfig (strict), ESM, `src/` + `bin` entry, build script
+- [x] Set up TypeScript project: package.json, tsconfig (strict), ESM, `src/` + `bin` entry, build script
 - [ ] Add Vitest with one passing test and an `npm test` script
 - [ ] Add ESLint + Prettier with `npm run lint`
 - [ ] Add GitHub Actions CI running lint, build and test on push/PR
