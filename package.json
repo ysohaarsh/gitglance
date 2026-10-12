@@ -16,11 +16,20 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "vitest run",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
     "typescript": "^5.5.0",
     "vitest": "^5.0.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ysohaarsh/gitglance.git"
+  },
+  "homepage": "https://github.com/ysohaarsh/gitglance#readme",
+  "bugs": {
+    "url": "https://github.com/ysohaarsh/gitglance/issues"
   }
 }
