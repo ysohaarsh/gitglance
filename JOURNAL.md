@@ -26,3 +26,10 @@ Daily log of what was built, decisions made, and what's next.
 - Decisions: new devDependencies are all standard tooling (eslint, @eslint/js, typescript-eslint, prettier, eslint-config-prettier). Ran Prettier over the repo, which only touched markdown whitespace.
 - Build, lint and tests pass.
 - Next: GitHub Actions CI running lint, build and test.
+
+## 2026-10-14
+
+- Done: CI workflow (`.github/workflows/ci.yml`) already existed from earlier infra commits and ran build and test on Node 22/24; added the missing `npm run lint` step so it covers lint, build and test on push/PR.
+- Decisions: no new workflow file, to avoid duplicating the existing one.
+- Build, lint and tests pass locally.
+- Next: CLI skeleton with commander.
