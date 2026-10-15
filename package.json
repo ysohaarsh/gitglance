@@ -38,5 +38,8 @@
   "homepage": "https://github.com/ysohaarsh/gitglance#readme",
   "bugs": {
     "url": "https://github.com/ysohaarsh/gitglance/issues"
+  },
+  "dependencies": {
+    "commander": "^14.0.3"
   }
 }

@@ -33,3 +33,10 @@ Daily log of what was built, decisions made, and what's next.
 - Decisions: no new workflow file, to avoid duplicating the existing one.
 - Build, lint and tests pass locally.
 - Next: CLI skeleton with commander.
+
+## 2026-10-15
+
+- Done: CLI skeleton with `commander`. `src/program.ts` builds the program (`--help`, `-v/--version`, stub subcommands stats, health, changelog, summary); `src/cli.ts` is now a thin entry point. Added `tests/program.test.ts`.
+- Decisions: added `commander` as the only runtime dependency (named in the project brief, tiny, no transitive deps). Program construction is separated from the entry point so tests can run it without spawning a process. Stubs print "not implemented yet" and exit 0.
+- Build, lint and tests pass.
+- Next: git access layer with typed helpers and a temp fixture repo.
