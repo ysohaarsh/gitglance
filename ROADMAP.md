@@ -9,7 +9,7 @@ Tasks are done top to bottom, one per day. Edit freely to steer the project.
 - [x] Add ESLint + Prettier with `npm run lint`
 - [x] Add GitHub Actions CI running lint, build and test on push/PR
 - [x] CLI skeleton with `commander`: `--help`, `--version`, subcommand stubs (stats, health, changelog, summary)
-- [ ] Git access layer: thin wrapper around `git` via child_process with typed helpers + tests using a temp fixture repo
+- [x] Git access layer: thin wrapper around `git` via child_process with typed helpers + tests using a temp fixture repo
 
 ## Phase 2: stats
 

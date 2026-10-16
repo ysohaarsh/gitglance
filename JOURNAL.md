@@ -40,3 +40,9 @@ Daily log of what was built, decisions made, and what's next.
 - Decisions: added `commander` as the only runtime dependency (named in the project brief, tiny, no transitive deps). Program construction is separated from the entry point so tests can run it without spawning a process. Stubs print "not implemented yet" and exit 0.
 - Build, lint and tests pass.
 - Next: git access layer with typed helpers and a temp fixture repo.
+
+## 2026-10-16
+
+- Done: git access layer in `src/git.ts`: `runGit` (execFile, no shell), `isGitRepo`, `hasCommits`, `currentBranch`, `getCommits` (typed `Commit`, since/until/range/maxCount), `listTags`, `listTrackedFiles`, plus `GitError`. Tests in `tests/git.test.ts` build a temp fixture repo.
+- Decisions: log output is delimited with ASCII unit/record separators so subjects and bodies containing newlines parse safely. Empty repositories return `[]` instead of throwing. No new dependencies.
+- Next: `stats`: total commits, first/last commit date, contributor count.
