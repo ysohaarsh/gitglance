@@ -46,3 +46,10 @@ Daily log of what was built, decisions made, and what's next.
 - Done: git access layer in `src/git.ts`: `runGit` (execFile, no shell), `isGitRepo`, `hasCommits`, `currentBranch`, `getCommits` (typed `Commit`, since/until/range/maxCount), `listTags`, `listTrackedFiles`, plus `GitError`. Tests in `tests/git.test.ts` build a temp fixture repo.
 - Decisions: log output is delimited with ASCII unit/record separators so subjects and bodies containing newlines parse safely. Empty repositories return `[]` instead of throwing. No new dependencies.
 - Next: `stats`: total commits, first/last commit date, contributor count.
+
+## 2026-10-17
+
+- Done: first real `stats` output: total commits, first/last commit date, unique contributors (by lowercased author email). Logic in `src/stats.ts` (pure `computeStats`, `formatStats`, `gatherStats`); wired into the `stats` command with a clear error and exit code 1 outside a git repo. Tests in `tests/stats.test.ts`; the program stub test now uses `health`.
+- Decisions: contributors are deduped by email, not name. Empty repos print zeros and `n/a`. No new dependencies.
+- Build, lint and tests pass.
+- Next: `stats` top contributors with `--limit`.

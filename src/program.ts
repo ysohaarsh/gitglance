@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import { formatStats, gatherStats } from "./stats.js";
 import { VERSION } from "./version.js";
 
 interface Subcommand {
@@ -28,5 +29,16 @@ export function buildProgram(): Command {
         console.log(`gitglance ${name}: not implemented yet`);
       });
   }
+
+  program.commands
+    .find((c) => c.name() === "stats")
+    ?.action(async () => {
+      try {
+        console.log(formatStats(await gatherStats(process.cwd())));
+      } catch (err) {
+        console.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
   return program;
 }

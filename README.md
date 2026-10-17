@@ -13,10 +13,21 @@
 
 🚧 Built in public, one small improvement a day. See [ROADMAP.md](ROADMAP.md) for what's next and [JOURNAL.md](JOURNAL.md) for the daily build log.
 
+## Usage
+
+`gitglance stats` prints a short overview of the current repository:
+
+```
+Commits:      12
+First commit: 2026-10-11
+Last commit:  2026-10-16
+Contributors: 2
+```
+
 ## Planned usage
 
 ```bash
-npx gitglance stats            # activity overview
+npx gitglance stats            # commits, first/last date, contributors
 npx gitglance health           # repo health report
 npx gitglance changelog --since v1.0.0
 npx gitglance summary --days 7 # AI summary (needs ANTHROPIC_API_KEY)
