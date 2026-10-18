@@ -4,7 +4,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Commit } from "../src/git.js";
-import { computeStats, formatStats, gatherStats } from "../src/stats.js";
+import {
+  computeStats,
+  formatContributors,
+  formatStats,
+  gatherReport,
+  gatherStats,
+  topContributors,
+} from "../src/stats.js";
 
 function commit(email: string, date: string): Commit {
   return {
@@ -37,6 +44,36 @@ describe("computeStats", () => {
     expect(stats.contributors).toBe(2);
     expect(stats.firstCommitDate).toBe("2026-01-01T10:00:00Z");
     expect(stats.lastCommitDate).toBe("2026-03-01T10:00:00Z");
+  });
+});
+
+describe("topContributors", () => {
+  const commits = [
+    commit("a@x.com", "3"),
+    commit("B@x.com", "2"),
+    commit("b@x.com", "1"),
+    commit("c@x.com", "0"),
+  ];
+
+  it("ranks by commits, merging emails case-insensitively", () => {
+    const top = topContributors(commits, 10);
+    expect(top.map((c) => [c.email, c.commits])).toEqual([
+      ["b@x.com", 2],
+      ["a@x.com", 1],
+      ["c@x.com", 1],
+    ]);
+  });
+
+  it("respects the limit", () => {
+    expect(topContributors(commits, 1)).toHaveLength(1);
+    expect(topContributors(commits, 0)).toEqual([]);
+  });
+
+  it("formats an aligned list, empty when nobody", () => {
+    expect(formatContributors([])).toBe("");
+    expect(formatContributors(topContributors(commits, 2))).toBe(
+      "Top contributors:\n  2  x\n  1  x",
+    );
   });
 });
 
@@ -80,6 +117,14 @@ describe("gatherStats", () => {
     const stats = await gatherStats(join(base, "repo"));
     expect(stats.totalCommits).toBe(1);
     expect(stats.contributors).toBe(1);
+  });
+
+  it("gathers a report with top contributors", async () => {
+    const { stats, top } = await gatherReport(join(base, "repo"), 3);
+    expect(stats.totalCommits).toBe(1);
+    expect(top).toEqual([
+      { name: "Ada", email: "ada@example.com", commits: 1 },
+    ]);
   });
 
   it("rejects non-repositories", async () => {

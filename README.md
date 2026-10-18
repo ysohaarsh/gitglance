@@ -22,7 +22,13 @@ Commits:      12
 First commit: 2026-10-11
 Last commit:  2026-10-16
 Contributors: 2
+
+Top contributors:
+  8  Ada Lovelace
+  4  Alan Turing
 ```
+
+Use `--limit <n>` (default 5) to change how many top contributors are listed.
 
 ## Planned usage
 

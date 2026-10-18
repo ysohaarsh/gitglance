@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { formatStats, gatherStats } from "./stats.js";
+import { formatContributors, formatStats, gatherReport } from "./stats.js";
 import { VERSION } from "./version.js";
 
 interface Subcommand {
@@ -32,9 +32,19 @@ export function buildProgram(): Command {
 
   program.commands
     .find((c) => c.name() === "stats")
-    ?.action(async () => {
+    ?.option("-l, --limit <n>", "number of top contributors to show", "5")
+    .action(async (opts: { limit: string }) => {
       try {
-        console.log(formatStats(await gatherStats(process.cwd())));
+        const limit = Number(opts.limit);
+        if (!Number.isInteger(limit) || limit < 0) {
+          throw new Error("--limit must be a non-negative integer");
+        }
+        const { stats, top } = await gatherReport(process.cwd(), limit);
+        console.log(
+          [formatStats(stats), formatContributors(top)]
+            .filter(Boolean)
+            .join("\n\n"),
+        );
       } catch (err) {
         console.error(err instanceof Error ? err.message : String(err));
         process.exitCode = 1;

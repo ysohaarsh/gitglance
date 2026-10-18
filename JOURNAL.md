@@ -53,3 +53,9 @@ Daily log of what was built, decisions made, and what's next.
 - Decisions: contributors are deduped by email, not name. Empty repos print zeros and `n/a`. No new dependencies.
 - Build, lint and tests pass.
 - Next: `stats` top contributors with `--limit`.
+
+## 2026-10-18
+
+- Done: `stats` now lists top contributors (`topContributors`, `formatContributors`, `gatherReport` in `src/stats.ts`) with `-l/--limit <n>` (default 5, validated as a non-negative integer). README updated.
+- Decisions: kept `RepoStats`/`gatherStats` unchanged and added a separate report function so the JSON output task can compose them later. Authors are grouped by lowercased email; ties break by name. No new dependencies.
+- Next: `stats` commits per weekday / per hour as ASCII bar charts.
