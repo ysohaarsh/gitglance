@@ -80,10 +80,14 @@ export async function gatherStats(cwd: string): Promise<RepoStats> {
 export async function gatherReport(
   cwd: string,
   limit: number,
-): Promise<{ stats: RepoStats; top: Contributor[] }> {
+): Promise<{ stats: RepoStats; top: Contributor[]; commits: Commit[] }> {
   if (!(await isGitRepo(cwd))) {
     throw new Error(`${cwd} is not a git repository`);
   }
   const commits = (await hasCommits(cwd)) ? await getCommits(cwd) : [];
-  return { stats: computeStats(commits), top: topContributors(commits, limit) };
+  return {
+    stats: computeStats(commits),
+    top: topContributors(commits, limit),
+    commits,
+  };
 }

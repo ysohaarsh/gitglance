@@ -59,3 +59,10 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `stats` now lists top contributors (`topContributors`, `formatContributors`, `gatherReport` in `src/stats.ts`) with `-l/--limit <n>` (default 5, validated as a non-negative integer). README updated.
 - Decisions: kept `RepoStats`/`gatherStats` unchanged and added a separate report function so the JSON output task can compose them later. Authors are grouped by lowercased email; ties break by name. No new dependencies.
 - Next: `stats` commits per weekday / per hour as ASCII bar charts.
+
+## 2026-10-19
+
+- Done: `stats --charts` prints ASCII bar charts of commits per weekday (Mon-Sun) and per hour (00-23). Logic in new `src/activity.ts` (`computeActivity`, `formatActivity`); `gatherReport` now also returns the commits. Tests in `tests/activity.test.ts`; README updated.
+- Decisions: buckets use the author's local time taken from the commit's ISO date rather than the machine's timezone, so output is deterministic. Charts are opt-in via `--charts` to keep default output short. No new dependencies.
+- Build, lint and tests pass.
+- Next: `stats`: most-changed files (churn hotspots).

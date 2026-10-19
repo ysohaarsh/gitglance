@@ -30,6 +30,15 @@ Top contributors:
 
 Use `--limit <n>` (default 5) to change how many top contributors are listed.
 
+Add `--charts` to print ASCII bar charts of commits per weekday and per hour (author-local time):
+
+```
+Commits by weekday:
+  Mon ██████████████████████████████ 8
+  Tue ███████████████                4
+  ...
+```
+
 ## Planned usage
 
 ```bash

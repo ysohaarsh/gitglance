@@ -15,7 +15,7 @@ Tasks are done top to bottom, one per day. Edit freely to steer the project.
 
 - [x] `stats`: total commits, first/last commit date, number of contributors
 - [x] `stats`: top contributors by commits (with `--limit`)
-- [ ] `stats`: commits per weekday / per hour as ASCII bar charts
+- [x] `stats`: commits per weekday / per hour as ASCII bar charts
 - [ ] `stats`: most-changed files (churn hotspots)
 - [ ] `--json` output flag for all stats
 - [ ] `--since` / `--until` date filtering

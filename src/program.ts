@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import { computeActivity, formatActivity } from "./activity.js";
 import { formatContributors, formatStats, gatherReport } from "./stats.js";
 import { VERSION } from "./version.js";
 
@@ -33,15 +34,23 @@ export function buildProgram(): Command {
   program.commands
     .find((c) => c.name() === "stats")
     ?.option("-l, --limit <n>", "number of top contributors to show", "5")
-    .action(async (opts: { limit: string }) => {
+    .option("--charts", "show commits per weekday and per hour")
+    .action(async (opts: { limit: string; charts?: boolean }) => {
       try {
         const limit = Number(opts.limit);
         if (!Number.isInteger(limit) || limit < 0) {
           throw new Error("--limit must be a non-negative integer");
         }
-        const { stats, top } = await gatherReport(process.cwd(), limit);
+        const { stats, top, commits } = await gatherReport(
+          process.cwd(),
+          limit,
+        );
         console.log(
-          [formatStats(stats), formatContributors(top)]
+          [
+            formatStats(stats),
+            formatContributors(top),
+            opts.charts ? formatActivity(computeActivity(commits)) : "",
+          ]
             .filter(Boolean)
             .join("\n\n"),
         );
