@@ -39,6 +39,14 @@ Commits by weekday:
   ...
 ```
 
+Add `--hotspots` to list the most-changed files (commits touching each file, honoring `--limit`):
+
+```
+Most-changed files:
+  14  src/stats.ts
+   9  README.md
+```
+
 ## Planned usage
 
 ```bash

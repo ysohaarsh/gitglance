@@ -66,3 +66,9 @@ Daily log of what was built, decisions made, and what's next.
 - Decisions: buckets use the author's local time taken from the commit's ISO date rather than the machine's timezone, so output is deterministic. Charts are opt-in via `--charts` to keep default output short. No new dependencies.
 - Build, lint and tests pass.
 - Next: `stats`: most-changed files (churn hotspots).
+
+## 2026-10-20
+
+- Done: `stats --hotspots` lists the most-changed files by number of commits touching each (`src/churn.ts`: `parseChurn`, `topChurn`, `formatChurn`, `gatherChurn`), honoring `--limit`. Tests in `tests/churn.test.ts`; README updated.
+- Decisions: counts commits per path from `git log --name-only --no-renames` rather than line counts, which is cheap and robust; renames are counted under both old and new paths. Opt-in flag keeps default output short. No new dependencies.
+- Next: `--json` output flag for all stats.
