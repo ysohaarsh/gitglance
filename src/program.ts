@@ -2,6 +2,7 @@ import { Command } from "commander";
 import { formatChurn, gatherChurn } from "./churn.js";
 import { computeActivity, formatActivity } from "./activity.js";
 import { formatContributors, formatStats, gatherReport } from "./stats.js";
+import { buildJsonReport } from "./report.js";
 import { VERSION } from "./version.js";
 
 interface Subcommand {
@@ -37,8 +38,14 @@ export function buildProgram(): Command {
     ?.option("-l, --limit <n>", "number of top contributors to show", "5")
     .option("--charts", "show commits per weekday and per hour")
     .option("--hotspots", "show the most-changed files")
+    .option("--json", "print all stats as JSON")
     .action(
-      async (opts: { limit: string; charts?: boolean; hotspots?: boolean }) => {
+      async (opts: {
+        limit: string;
+        charts?: boolean;
+        hotspots?: boolean;
+        json?: boolean;
+      }) => {
         try {
           const limit = Number(opts.limit);
           if (!Number.isInteger(limit) || limit < 0) {
@@ -48,6 +55,17 @@ export function buildProgram(): Command {
             process.cwd(),
             limit,
           );
+          if (opts.json) {
+            const hotspots = await gatherChurn(process.cwd(), limit);
+            console.log(
+              JSON.stringify(
+                buildJsonReport(stats, top, hotspots, commits),
+                null,
+                2,
+              ),
+            );
+            return;
+          }
           console.log(
             [
               formatStats(stats),

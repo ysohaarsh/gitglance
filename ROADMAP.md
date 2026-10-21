@@ -17,7 +17,7 @@ Tasks are done top to bottom, one per day. Edit freely to steer the project.
 - [x] `stats`: top contributors by commits (with `--limit`)
 - [x] `stats`: commits per weekday / per hour as ASCII bar charts
 - [x] `stats`: most-changed files (churn hotspots)
-- [ ] `--json` output flag for all stats
+- [x] `--json` output flag for all stats
 - [ ] `--since` / `--until` date filtering
 
 ## Phase 3: health

@@ -72,3 +72,10 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `stats --hotspots` lists the most-changed files by number of commits touching each (`src/churn.ts`: `parseChurn`, `topChurn`, `formatChurn`, `gatherChurn`), honoring `--limit`. Tests in `tests/churn.test.ts`; README updated.
 - Decisions: counts commits per path from `git log --name-only --no-renames` rather than line counts, which is cheap and robust; renames are counted under both old and new paths. Opt-in flag keeps default output short. No new dependencies.
 - Next: `--json` output flag for all stats.
+
+## 2026-10-21
+
+- Done: `stats --json` prints one JSON document with `stats`, `contributors`, `hotspots` and `activity` (weekday/hour counts). Pure assembly in new `src/report.ts` (`buildJsonReport`), test in `tests/report.test.ts`; README updated.
+- Decisions: JSON always includes every section regardless of `--charts`/`--hotspots`, since scripts want the full picture; `--limit` applies to contributors and hotspots. No new dependencies.
+- Build, lint and tests pass.
+- Next: `--since` / `--until` date filtering.

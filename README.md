@@ -47,6 +47,12 @@ Most-changed files:
    9  README.md
 ```
 
+Add `--json` to print everything (stats, contributors, hotspots, weekday/hour activity) as a single JSON document for scripting:
+
+```bash
+npx gitglance stats --json | jq .stats.totalCommits
+```
+
 ## Planned usage
 
 ```bash
