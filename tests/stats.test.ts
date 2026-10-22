@@ -1,3 +1,4 @@
+import { gatherChurn } from "../src/churn.js";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -125,6 +126,44 @@ describe("gatherStats", () => {
     expect(top).toEqual([
       { name: "Ada", email: "ada@example.com", commits: 1 },
     ]);
+  });
+
+  it("filters commits by --since/--until", async () => {
+    const cwd = join(base, "dated");
+    mkdirSync(cwd);
+    const run = (date: string, ...args: string[]) =>
+      execFileSync("git", args, {
+        cwd,
+        env: {
+          ...process.env,
+          GIT_AUTHOR_NAME: "Ada",
+          GIT_AUTHOR_EMAIL: "ada@example.com",
+          GIT_COMMITTER_NAME: "Ada",
+          GIT_COMMITTER_EMAIL: "ada@example.com",
+          GIT_AUTHOR_DATE: date,
+          GIT_COMMITTER_DATE: date,
+        },
+      });
+    run("2026-01-01T00:00:00Z", "init", "-q", "-b", "main");
+    run("2026-01-01T00:00:00Z", "config", "commit.gpgsign", "false");
+    for (const [i, date] of [
+      "2026-01-10T12:00:00Z",
+      "2026-02-10T12:00:00Z",
+      "2026-03-10T12:00:00Z",
+    ].entries()) {
+      writeFileSync(join(cwd, "f.txt"), String(i));
+      run(date, "add", ".");
+      run(date, "commit", "-q", "-m", `c${i}`);
+    }
+    const since = await gatherReport(cwd, 3, { since: "2026-02-01" });
+    expect(since.stats.totalCommits).toBe(2);
+    const both = await gatherReport(cwd, 3, {
+      since: "2026-02-01",
+      until: "2026-03-01",
+    });
+    expect(both.stats.totalCommits).toBe(1);
+    const churn = await gatherChurn(cwd, 3, { until: "2026-02-01" });
+    expect(churn).toEqual([{ path: "f.txt", commits: 1 }]);
   });
 
   it("rejects non-repositories", async () => {

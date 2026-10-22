@@ -79,3 +79,10 @@ Daily log of what was built, decisions made, and what's next.
 - Decisions: JSON always includes every section regardless of `--charts`/`--hotspots`, since scripts want the full picture; `--limit` applies to contributors and hotspots. No new dependencies.
 - Build, lint and tests pass.
 - Next: `--since` / `--until` date filtering.
+
+## 2026-10-22
+
+- Done: `stats --since <date>` / `--until <date>` filter every section (counts, contributors, hotspots, charts, JSON). `gatherReport` and `gatherChurn` take an optional date range passed to `git log --since/--until`. Test builds a repo with dated commits; README updated.
+- Decisions: dates are passed straight to git so relative forms like "2 weeks ago" work, rather than adding a date parser. No new dependencies.
+- Build, lint and tests pass.
+- Next: `health`: check for README, LICENSE, .gitignore, CI config.

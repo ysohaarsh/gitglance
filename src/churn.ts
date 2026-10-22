@@ -1,4 +1,4 @@
-import { hasCommits, isGitRepo, runGit } from "./git.js";
+import { hasCommits, isGitRepo, type LogOptions, runGit } from "./git.js";
 
 export interface FileChurn {
   path: string;
@@ -40,19 +40,23 @@ export function formatChurn(list: FileChurn[]): string {
 export async function gatherChurn(
   cwd: string,
   limit: number,
+  range: Pick<LogOptions, "since" | "until"> = {},
 ): Promise<FileChurn[]> {
   if (!(await isGitRepo(cwd))) {
     throw new Error(`${cwd} is not a git repository`);
   }
   if (!(await hasCommits(cwd))) return [];
-  const raw = await runGit(cwd, [
+  const args = [
     "-c",
     "core.quotepath=false",
     "log",
     "--name-only",
     "--no-renames",
     "--format=",
-    "HEAD",
-  ]);
+  ];
+  if (range.since) args.push(`--since=${range.since}`);
+  if (range.until) args.push(`--until=${range.until}`);
+  args.push("HEAD");
+  const raw = await runGit(cwd, args);
   return topChurn(parseChurn(raw), limit);
 }

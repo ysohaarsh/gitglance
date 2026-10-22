@@ -1,4 +1,10 @@
-import { type Commit, getCommits, hasCommits, isGitRepo } from "./git.js";
+import {
+  type Commit,
+  getCommits,
+  hasCommits,
+  isGitRepo,
+  type LogOptions,
+} from "./git.js";
 
 export interface RepoStats {
   totalCommits: number;
@@ -76,15 +82,19 @@ export async function gatherStats(cwd: string): Promise<RepoStats> {
   return computeStats(await getCommits(cwd));
 }
 
+/** Optional date bounds, in any format `git log --since/--until` accepts. */
+export type DateRange = Pick<LogOptions, "since" | "until">;
+
 /** Stats plus the top `limit` contributors for the repository at `cwd`. */
 export async function gatherReport(
   cwd: string,
   limit: number,
+  range: DateRange = {},
 ): Promise<{ stats: RepoStats; top: Contributor[]; commits: Commit[] }> {
   if (!(await isGitRepo(cwd))) {
     throw new Error(`${cwd} is not a git repository`);
   }
-  const commits = (await hasCommits(cwd)) ? await getCommits(cwd) : [];
+  const commits = (await hasCommits(cwd)) ? await getCommits(cwd, range) : [];
   return {
     stats: computeStats(commits),
     top: topContributors(commits, limit),

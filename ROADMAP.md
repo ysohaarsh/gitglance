@@ -18,7 +18,7 @@ Tasks are done top to bottom, one per day. Edit freely to steer the project.
 - [x] `stats`: commits per weekday / per hour as ASCII bar charts
 - [x] `stats`: most-changed files (churn hotspots)
 - [x] `--json` output flag for all stats
-- [ ] `--since` / `--until` date filtering
+- [x] `--since` / `--until` date filtering
 
 ## Phase 3: health
 

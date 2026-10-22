@@ -30,6 +30,12 @@ Top contributors:
 
 Use `--limit <n>` (default 5) to change how many top contributors are listed.
 
+Use `--since <date>` and/or `--until <date>` to restrict every section to a time window. Any date `git log` understands works, e.g. `--since 2026-01-01` or `--since "2 weeks ago"`:
+
+```bash
+npx gitglance stats --since 2026-01-01 --until 2026-02-01
+```
+
 Add `--charts` to print ASCII bar charts of commits per weekday and per hour (author-local time):
 
 ```

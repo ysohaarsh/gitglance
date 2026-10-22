@@ -38,6 +38,8 @@ export function buildProgram(): Command {
     ?.option("-l, --limit <n>", "number of top contributors to show", "5")
     .option("--charts", "show commits per weekday and per hour")
     .option("--hotspots", "show the most-changed files")
+    .option("--since <date>", "only count commits after this date")
+    .option("--until <date>", "only count commits before this date")
     .option("--json", "print all stats as JSON")
     .action(
       async (opts: {
@@ -45,18 +47,22 @@ export function buildProgram(): Command {
         charts?: boolean;
         hotspots?: boolean;
         json?: boolean;
+        since?: string;
+        until?: string;
       }) => {
         try {
           const limit = Number(opts.limit);
           if (!Number.isInteger(limit) || limit < 0) {
             throw new Error("--limit must be a non-negative integer");
           }
+          const range = { since: opts.since, until: opts.until };
           const { stats, top, commits } = await gatherReport(
             process.cwd(),
             limit,
+            range,
           );
           if (opts.json) {
-            const hotspots = await gatherChurn(process.cwd(), limit);
+            const hotspots = await gatherChurn(process.cwd(), limit, range);
             console.log(
               JSON.stringify(
                 buildJsonReport(stats, top, hotspots, commits),
@@ -71,7 +77,7 @@ export function buildProgram(): Command {
               formatStats(stats),
               formatContributors(top),
               opts.hotspots
-                ? formatChurn(await gatherChurn(process.cwd(), limit))
+                ? formatChurn(await gatherChurn(process.cwd(), limit, range))
                 : "",
               opts.charts ? formatActivity(computeActivity(commits)) : "",
             ]
