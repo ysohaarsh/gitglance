@@ -63,7 +63,7 @@ npx gitglance stats --json | jq .stats.totalCommits
 
 ```bash
 npx gitglance stats            # commits, first/last date, contributors
-npx gitglance health           # repo health report
+npx gitglance health           # repo health report (README, LICENSE, .gitignore, CI)
 npx gitglance changelog --since v1.0.0
 npx gitglance summary --days 7 # AI summary (needs ANTHROPIC_API_KEY)
 ```

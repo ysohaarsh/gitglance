@@ -2,6 +2,7 @@ import { Command } from "commander";
 import { formatChurn, gatherChurn } from "./churn.js";
 import { computeActivity, formatActivity } from "./activity.js";
 import { formatContributors, formatStats, gatherReport } from "./stats.js";
+import { checkBasics, formatHealth } from "./health.js";
 import { buildJsonReport } from "./report.js";
 import { VERSION } from "./version.js";
 
@@ -90,5 +91,11 @@ export function buildProgram(): Command {
         }
       },
     );
+
+  program.commands
+    .find((c) => c.name() === "health")
+    ?.action(() => {
+      console.log(formatHealth(checkBasics(process.cwd())));
+    });
   return program;
 }

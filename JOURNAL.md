@@ -86,3 +86,9 @@ Daily log of what was built, decisions made, and what's next.
 - Decisions: dates are passed straight to git so relative forms like "2 weeks ago" work, rather than adding a date parser. No new dependencies.
 - Build, lint and tests pass.
 - Next: `health`: check for README, LICENSE, .gitignore, CI config.
+
+## 2026-10-23
+
+- Done: `health` now checks for a README, LICENSE, .gitignore and CI config (GitHub Actions, GitLab, CircleCI, Azure, Travis, Jenkins) and prints a PASS/FAIL table with a summary. Logic in new `src/health.ts` (`checkBasics`, `formatHealth`), tests in `tests/health.test.ts`.
+- Decisions: checks look at the working directory (top level only), matching file names case-insensitively; an empty `.github/workflows` does not count. No new dependencies.
+- Next: `health`: detect large files tracked in git (configurable threshold).
