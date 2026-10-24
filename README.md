@@ -63,7 +63,8 @@ npx gitglance stats --json | jq .stats.totalCommits
 
 ```bash
 npx gitglance stats            # commits, first/last date, contributors
-npx gitglance health           # repo health report (README, LICENSE, .gitignore, CI)
+npx gitglance health           # repo health report (README, LICENSE, .gitignore, CI, large files)
+npx gitglance health --max-file-size 500   # flag tracked files >= 500 KB (default 1024)
 npx gitglance changelog --since v1.0.0
 npx gitglance summary --days 7 # AI summary (needs ANTHROPIC_API_KEY)
 ```

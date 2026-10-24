@@ -92,3 +92,10 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `health` now checks for a README, LICENSE, .gitignore and CI config (GitHub Actions, GitLab, CircleCI, Azure, Travis, Jenkins) and prints a PASS/FAIL table with a summary. Logic in new `src/health.ts` (`checkBasics`, `formatHealth`), tests in `tests/health.test.ts`.
 - Decisions: checks look at the working directory (top level only), matching file names case-insensitively; an empty `.github/workflows` does not count. No new dependencies.
 - Next: `health`: detect large files tracked in git (configurable threshold).
+
+## 2026-10-24
+
+- Done: `health` now flags files tracked at HEAD above a size threshold (`--max-file-size <kb>`, default 1024). `parseLargeFiles` and `checkLargeFiles` in `src/health.ts` use `git ls-tree -r -l HEAD`; the detail line lists the three largest. Tests cover parsing and a real temp repo; README updated.
+- Decisions: checks sizes at HEAD only (not history); a repo with no commits or a non-repo directory skips the check as passing rather than failing the whole command. No new dependencies.
+- Build, lint and tests pass.
+- Next: `health`: list stale branches (no commits in N days).
