@@ -6,8 +6,10 @@ import { describe, expect, it } from "vitest";
 import {
   checkBasics,
   checkLargeFiles,
+  checkStaleBranches,
   formatHealth,
   parseLargeFiles,
+  parseStaleBranches,
 } from "../src/health.js";
 
 function tmp(): string {
@@ -90,5 +92,60 @@ describe("checkLargeFiles", () => {
 
   it("passes gracefully outside a repository", async () => {
     expect((await checkLargeFiles(tmp(), 1)).passed).toBe(true);
+  });
+});
+
+describe("parseStaleBranches", () => {
+  const now = Date.UTC(2026, 0, 31);
+  const ts = (daysAgo: number) => Math.floor(now / 1000) - daysAgo * 86400;
+
+  it("keeps old branches oldest first and skips the current branch", () => {
+    const refs = [
+      ` \tfresh\t${ts(5)}`,
+      ` \told\t${ts(100)}`,
+      `*\tmain\t${ts(400)}`,
+      ` \tolder\t${ts(200)}`,
+    ].join("\n");
+    expect(parseStaleBranches(refs, 90, now)).toEqual([
+      { name: "older", days: 200 },
+      { name: "old", days: 100 },
+    ]);
+  });
+});
+
+describe("checkStaleBranches", () => {
+  function git(cwd: string, args: string[], date?: string): void {
+    execFileSync("git", args, {
+      cwd,
+      env: {
+        ...process.env,
+        GIT_AUTHOR_NAME: "T",
+        GIT_AUTHOR_EMAIL: "t@example.com",
+        GIT_COMMITTER_NAME: "T",
+        GIT_COMMITTER_EMAIL: "t@example.com",
+        ...(date ? { GIT_COMMITTER_DATE: date, GIT_AUTHOR_DATE: date } : {}),
+      },
+    });
+  }
+
+  it("flags an old branch but not the current one", async () => {
+    const root = tmp();
+    git(root, ["init", "-q", "-b", "main"]);
+    git(
+      root,
+      ["commit", "-q", "--allow-empty", "-m", "a"],
+      "2020-01-01T00:00:00Z",
+    );
+    git(root, ["branch", "old"]);
+    const result = await checkStaleBranches(root, 90, Date.UTC(2020, 11, 31));
+    expect(result.passed).toBe(false);
+    expect(result.detail).toContain("old (");
+    expect(result.detail).not.toContain("main");
+  });
+
+  it("passes when there are no commits", async () => {
+    const root = tmp();
+    git(root, ["init", "-q"]);
+    expect((await checkStaleBranches(root, 90)).passed).toBe(true);
   });
 });

@@ -99,3 +99,9 @@ Daily log of what was built, decisions made, and what's next.
 - Decisions: checks sizes at HEAD only (not history); a repo with no commits or a non-repo directory skips the check as passing rather than failing the whole command. No new dependencies.
 - Build, lint and tests pass.
 - Next: `health`: list stale branches (no commits in N days).
+
+## 2026-10-25
+
+- Done: `health` now flags local branches with no commits in N days (`--stale-days <n>`, default 90). `parseStaleBranches` and `checkStaleBranches` in `src/health.ts` use `git for-each-ref refs/heads`; the detail line lists the three oldest. Tests cover parsing and real temp repos; README updated.
+- Decisions: only local branches are checked and the checked-out branch is never reported as stale; a repo with no commits skips the check as passing. `now` is injectable for deterministic tests. No new dependencies.
+- Next: `health`: TODO/FIXME count per file.

@@ -2,7 +2,12 @@ import { Command } from "commander";
 import { formatChurn, gatherChurn } from "./churn.js";
 import { computeActivity, formatActivity } from "./activity.js";
 import { formatContributors, formatStats, gatherReport } from "./stats.js";
-import { checkBasics, checkLargeFiles, formatHealth } from "./health.js";
+import {
+  checkBasics,
+  checkLargeFiles,
+  checkStaleBranches,
+  formatHealth,
+} from "./health.js";
 import { buildJsonReport } from "./report.js";
 import { VERSION } from "./version.js";
 
@@ -99,13 +104,26 @@ export function buildProgram(): Command {
       "flag tracked files at least this many KB",
       "1024",
     )
-    .action(async (opts: { maxFileSize: string }) => {
+    .option(
+      "--stale-days <n>",
+      "flag branches with no commits in this many days",
+      "90",
+    )
+    .action(async (opts: { maxFileSize: string; staleDays: string }) => {
       const kb = Number(opts.maxFileSize);
       if (!Number.isFinite(kb) || kb <= 0) {
         throw new Error("--max-file-size must be a positive number of KB");
       }
+      const days = Number(opts.staleDays);
+      if (!Number.isFinite(days) || days <= 0) {
+        throw new Error("--stale-days must be a positive number of days");
+      }
       const cwd = process.cwd();
-      const checks = [...checkBasics(cwd), await checkLargeFiles(cwd, kb)];
+      const checks = [
+        ...checkBasics(cwd),
+        await checkLargeFiles(cwd, kb),
+        await checkStaleBranches(cwd, days),
+      ];
       console.log(formatHealth(checks));
     });
   return program;

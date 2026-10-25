@@ -95,6 +95,63 @@ export async function checkLargeFiles(
   };
 }
 
+export interface StaleBranch {
+  name: string;
+  days: number;
+}
+
+/**
+ * Parse `for-each-ref` lines of `<HEAD marker>\t<name>\t<unix time>` into local
+ * branches older than `staleDays`, oldest first. The checked-out branch is skipped.
+ */
+export function parseStaleBranches(
+  refs: string,
+  staleDays: number,
+  nowMs: number,
+): StaleBranch[] {
+  const stale: StaleBranch[] = [];
+  for (const line of refs.split("\n")) {
+    const [head, name, ts] = line.split("\t");
+    if (!name || !ts || head === "*") continue;
+    const days = Math.floor((nowMs / 1000 - Number(ts)) / 86400);
+    if (days >= staleDays) stale.push({ name, days });
+  }
+  return stale.sort((a, b) => b.days - a.days || a.name.localeCompare(b.name));
+}
+
+/** Check for local branches whose last commit is at least `staleDays` days old. */
+export async function checkStaleBranches(
+  cwd: string,
+  staleDays: number,
+  nowMs: number = Date.now(),
+): Promise<HealthCheck> {
+  const name = "Stale branches";
+  let out: string;
+  try {
+    out = await runGit(cwd, [
+      "for-each-ref",
+      "--format=%(HEAD)\t%(refname:short)\t%(committerdate:unix)",
+      "refs/heads",
+    ]);
+  } catch {
+    return { name, passed: true, detail: "skipped (no branches to inspect)" };
+  }
+  const stale = parseStaleBranches(out, staleDays, nowMs);
+  if (stale.length === 0) {
+    return { name, passed: true, detail: `none older than ${staleDays} days` };
+  }
+  const shown = stale
+    .slice(0, 3)
+    .map((b) => `${b.name} (${b.days}d)`)
+    .join(", ");
+  const more = stale.length > 3 ? `, +${stale.length - 3} more` : "";
+  return {
+    name,
+    passed: false,
+    detail: `${stale.length} older than ${staleDays} days: ${shown}${more}`,
+  };
+}
+
 export function formatHealth(checks: HealthCheck[]): string {
   const width = Math.max(...checks.map((c) => c.name.length));
   const rows = checks.map(
