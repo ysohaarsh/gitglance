@@ -152,6 +152,47 @@ export async function checkStaleBranches(
   };
 }
 
+export interface TodoCount {
+  path: string;
+  count: number;
+}
+
+/** Parse `git grep -c` lines of `<path>:<count>` into files with markers, most first. */
+export function parseTodoCounts(grepCounts: string): TodoCount[] {
+  const files: TodoCount[] = [];
+  for (const line of grepCounts.split("\n")) {
+    const m = /^(.+):(\d+)$/.exec(line);
+    if (m) files.push({ path: m[1] as string, count: Number(m[2]) });
+  }
+  return files.sort(
+    (a, b) => b.count - a.count || a.path.localeCompare(b.path),
+  );
+}
+
+/** Count TODO/FIXME markers in tracked text files of the working tree, per file. */
+export async function checkTodos(cwd: string): Promise<HealthCheck> {
+  const name = "TODO/FIXME";
+  let out = "";
+  try {
+    out = await runGit(cwd, ["grep", "-c", "-I", "-E", "\\b(TODO|FIXME)\\b"]);
+  } catch {
+    // `git grep` exits 1 when nothing matches; treat that (and non-repos) as none.
+  }
+  const files = parseTodoCounts(out);
+  if (files.length === 0) return { name, passed: true, detail: "none found" };
+  const total = files.reduce((sum, f) => sum + f.count, 0);
+  const shown = files
+    .slice(0, 3)
+    .map((f) => `${f.path} (${f.count})`)
+    .join(", ");
+  const more = files.length > 3 ? `, +${files.length - 3} more` : "";
+  return {
+    name,
+    passed: false,
+    detail: `${total} in ${files.length} files: ${shown}${more}`,
+  };
+}
+
 export function formatHealth(checks: HealthCheck[]): string {
   const width = Math.max(...checks.map((c) => c.name.length));
   const rows = checks.map(

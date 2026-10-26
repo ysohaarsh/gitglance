@@ -6,6 +6,7 @@ import {
   checkBasics,
   checkLargeFiles,
   checkStaleBranches,
+  checkTodos,
   formatHealth,
 } from "./health.js";
 import { buildJsonReport } from "./report.js";
@@ -123,6 +124,7 @@ export function buildProgram(): Command {
         ...checkBasics(cwd),
         await checkLargeFiles(cwd, kb),
         await checkStaleBranches(cwd, days),
+        await checkTodos(cwd),
       ];
       console.log(formatHealth(checks));
     });

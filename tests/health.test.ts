@@ -7,9 +7,11 @@ import {
   checkBasics,
   checkLargeFiles,
   checkStaleBranches,
+  checkTodos,
   formatHealth,
   parseLargeFiles,
   parseStaleBranches,
+  parseTodoCounts,
 } from "../src/health.js";
 
 function tmp(): string {
@@ -147,5 +149,44 @@ describe("checkStaleBranches", () => {
     const root = tmp();
     git(root, ["init", "-q"]);
     expect((await checkStaleBranches(root, 90)).passed).toBe(true);
+  });
+});
+
+describe("parseTodoCounts", () => {
+  it("sorts files by count then path and ignores junk", () => {
+    expect(parseTodoCounts("b.ts:1\na.ts:1\nsrc/c.ts:4\n\nnoise")).toEqual([
+      { path: "src/c.ts", count: 4 },
+      { path: "a.ts", count: 1 },
+      { path: "b.ts", count: 1 },
+    ]);
+  });
+});
+
+describe("checkTodos", () => {
+  function repo(files: Record<string, string>): string {
+    const root = tmp();
+    const git = (...a: string[]) => execFileSync("git", a, { cwd: root });
+    git("init", "-q");
+    for (const [name, text] of Object.entries(files)) {
+      writeFileSync(join(root, name), text);
+    }
+    git("add", ".");
+    return root;
+  }
+
+  it("passes when no markers exist", async () => {
+    const check = await checkTodos(repo({ "a.ts": "const x = 1;\n" }));
+    expect(check).toMatchObject({ passed: true, detail: "none found" });
+  });
+
+  it("counts markers per file", async () => {
+    const root = repo({
+      "a.ts": "// TODO: one\n// FIXME: two\n",
+      "b.ts": "// TODO: three\n",
+      "c.ts": "todoist is not a marker\n",
+    });
+    const check = await checkTodos(root);
+    expect(check.passed).toBe(false);
+    expect(check.detail).toBe("3 in 2 files: a.ts (2), b.ts (1)");
   });
 });

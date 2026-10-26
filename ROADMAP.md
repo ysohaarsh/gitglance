@@ -25,7 +25,7 @@ Tasks are done top to bottom, one per day. Edit freely to steer the project.
 - [x] `health`: check for README, LICENSE, .gitignore, CI config; print pass/fail table
 - [x] `health`: detect large files tracked in git (configurable threshold)
 - [x] `health`: list stale branches (no commits in N days)
-- [ ] `health`: TODO/FIXME count per file
+- [x] `health`: TODO/FIXME count per file
 - [ ] `health`: overall score 0–100 with explanation
 
 ## Phase 4: changelog

@@ -105,3 +105,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `health` now flags local branches with no commits in N days (`--stale-days <n>`, default 90). `parseStaleBranches` and `checkStaleBranches` in `src/health.ts` use `git for-each-ref refs/heads`; the detail line lists the three oldest. Tests cover parsing and real temp repos; README updated.
 - Decisions: only local branches are checked and the checked-out branch is never reported as stale; a repo with no commits skips the check as passing. `now` is injectable for deterministic tests. No new dependencies.
 - Next: `health`: TODO/FIXME count per file.
+
+## 2026-10-26
+
+- Done: `health` now counts TODO/FIXME markers per tracked file (`parseTodoCounts` and `checkTodos` in `src/health.ts`, via `git grep -c -I`); the detail line gives the total and the three busiest files. Tests cover parsing and real temp repos; README updated.
+- Decisions: whole-word, case-sensitive match so words like "todoist" don't count; binary files are skipped; the check fails when any marker exists, consistent with the other checks (the upcoming score can weigh it). No new dependencies.
+- Next: `health`: overall score 0-100 with explanation.
