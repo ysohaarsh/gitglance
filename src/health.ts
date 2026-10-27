@@ -193,6 +193,39 @@ export async function checkTodos(cwd: string): Promise<HealthCheck> {
   };
 }
 
+const CHECK_WEIGHTS: Record<string, number> = {
+  README: 15,
+  LICENSE: 10,
+  ".gitignore": 10,
+  "CI config": 20,
+  "Large files": 15,
+  "Stale branches": 10,
+  "TODO/FIXME": 20,
+};
+const DEFAULT_WEIGHT = 10;
+
+export interface HealthScore {
+  score: number;
+  /** One line per failed check: the points it cost and why. */
+  deductions: string[];
+}
+
+/** Weighted 0-100 score: each check is worth a fixed number of points, lost when it fails. */
+export function computeScore(checks: HealthCheck[]): HealthScore {
+  const weight = (c: HealthCheck) => CHECK_WEIGHTS[c.name] ?? DEFAULT_WEIGHT;
+  const total = checks.reduce((sum, c) => sum + weight(c), 0);
+  if (total === 0) return { score: 100, deductions: [] };
+  const earned = checks
+    .filter((c) => c.passed)
+    .reduce((sum, c) => sum + weight(c), 0);
+  const failed = checks.filter((c) => !c.passed);
+  const deductions = failed.map((c) => {
+    const lost = Math.round((weight(c) / total) * 100);
+    return `-${lost}  ${c.name}: ${c.detail}`;
+  });
+  return { score: Math.round((earned / total) * 100), deductions };
+}
+
 export function formatHealth(checks: HealthCheck[]): string {
   const width = Math.max(...checks.map((c) => c.name.length));
   const rows = checks.map(
@@ -200,9 +233,12 @@ export function formatHealth(checks: HealthCheck[]): string {
       `${c.passed ? "PASS" : "FAIL"}  ${c.name.padEnd(width)}  ${c.detail}`,
   );
   const passed = checks.filter((c) => c.passed).length;
+  const { score, deductions } = computeScore(checks);
   return [
     "Health checks",
     ...rows,
     `${passed}/${checks.length} checks passed`,
+    `Score: ${score}/100`,
+    ...(deductions.length > 0 ? ["Points lost:", ...deductions] : []),
   ].join("\n");
 }

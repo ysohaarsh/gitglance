@@ -8,6 +8,7 @@ import {
   checkLargeFiles,
   checkStaleBranches,
   checkTodos,
+  computeScore,
   formatHealth,
   parseLargeFiles,
   parseStaleBranches,
@@ -52,6 +53,37 @@ describe("formatHealth", () => {
     expect(out).toContain("PASS  README   README.md");
     expect(out).toContain("FAIL  LICENSE  not found");
     expect(out).toContain("1/2 checks passed");
+    expect(out).toContain("Score: 60/100");
+    expect(out).toContain("-40  LICENSE: not found");
+  });
+
+  it("omits the deductions section when everything passes", () => {
+    const out = formatHealth([{ name: "README", passed: true, detail: "ok" }]);
+    expect(out).toContain("Score: 100/100");
+    expect(out).not.toContain("Points lost");
+  });
+});
+
+describe("computeScore", () => {
+  it("is 100 when all checks pass and 0 when all fail", () => {
+    const mk = (passed: boolean) =>
+      ["README", "CI config"].map((name) => ({ name, passed, detail: "x" }));
+    expect(computeScore(mk(true)).score).toBe(100);
+    expect(computeScore(mk(false)).score).toBe(0);
+  });
+
+  it("weights checks and gives unknown checks a default weight", () => {
+    const { score, deductions } = computeScore([
+      { name: "CI config", passed: false, detail: "not found" },
+      { name: "README", passed: true, detail: "README.md" },
+      { name: "Custom", passed: true, detail: "ok" },
+    ]);
+    expect(score).toBe(56);
+    expect(deductions).toEqual(["-44  CI config: not found"]);
+  });
+
+  it("scores an empty list as 100", () => {
+    expect(computeScore([])).toEqual({ score: 100, deductions: [] });
   });
 });
 

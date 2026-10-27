@@ -111,3 +111,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `health` now counts TODO/FIXME markers per tracked file (`parseTodoCounts` and `checkTodos` in `src/health.ts`, via `git grep -c -I`); the detail line gives the total and the three busiest files. Tests cover parsing and real temp repos; README updated.
 - Decisions: whole-word, case-sensitive match so words like "todoist" don't count; binary files are skipped; the check fails when any marker exists, consistent with the other checks (the upcoming score can weigh it). No new dependencies.
 - Next: `health`: overall score 0-100 with explanation.
+
+## 2026-10-27
+
+- Done: `health` now prints a weighted 0-100 score plus a "Points lost" list explaining each failed check. `computeScore` in `src/health.ts`; `formatHealth` appends the score. Tests cover all-pass, all-fail, weighting, default weight and the empty list; README updated.
+- Decisions: fixed weights per check (CI 20, TODO/FIXME 20, README 15, large files 15, LICENSE/.gitignore/stale branches 10), unknown checks default to 10; scores are normalised by total weight so new checks slot in. No new dependencies.
+- Next: parse Conventional Commit messages (type, scope, breaking) with tests.
