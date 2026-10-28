@@ -117,3 +117,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `health` now prints a weighted 0-100 score plus a "Points lost" list explaining each failed check. `computeScore` in `src/health.ts`; `formatHealth` appends the score. Tests cover all-pass, all-fail, weighting, default weight and the empty list; README updated.
 - Decisions: fixed weights per check (CI 20, TODO/FIXME 20, README 15, large files 15, LICENSE/.gitignore/stale branches 10), unknown checks default to 10; scores are normalised by total weight so new checks slot in. No new dependencies.
 - Next: parse Conventional Commit messages (type, scope, breaking) with tests.
+
+## 2026-10-28
+
+- Done: added `parseConventionalCommit` in new `src/conventional.ts` returning type, scope, breaking flag, description and body (or null for non-conventional subjects). Tests in `tests/conventional.test.ts`. Not wired into a command yet; the next changelog tasks consume it.
+- Decisions: type is lowercased; breaking is detected from `!` or a `BREAKING CHANGE:`/`BREAKING-CHANGE:` footer; empty scope becomes null. No new dependencies.
+- Next: `changelog`: group commits by type between two refs.
