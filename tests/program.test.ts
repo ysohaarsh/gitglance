@@ -40,7 +40,7 @@ describe("program", () => {
   });
 
   it("runs subcommand stubs", () => {
-    expect(run(["changelog"]).out).toContain("changelog: not implemented yet");
+    expect(run(["summary"]).out).toContain("summary: not implemented yet");
   });
 
   it("rejects unknown commands", () => {
