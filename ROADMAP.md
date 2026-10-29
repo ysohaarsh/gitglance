@@ -31,7 +31,7 @@ Tasks are done top to bottom, one per day. Edit freely to steer the project.
 ## Phase 4: changelog
 
 - [x] Parse Conventional Commit messages (type, scope, breaking) with tests
-- [ ] `changelog`: group commits by type between two refs
+- [x] `changelog`: group commits by type between two refs
 - [ ] `changelog`: split by version tags, output Markdown
 - [ ] `changelog --write`: prepend to CHANGELOG.md
 

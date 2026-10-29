@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import { formatChangelog, gatherChangelog } from "./changelog.js";
 import { formatChurn, gatherChurn } from "./churn.js";
 import { computeActivity, formatActivity } from "./activity.js";
 import { formatContributors, formatStats, gatherReport } from "./stats.js";
@@ -127,6 +128,21 @@ export function buildProgram(): Command {
         await checkTodos(cwd),
       ];
       console.log(formatHealth(checks));
+    });
+
+  program.commands
+    .find((c) => c.name() === "changelog")
+    ?.option("--from <ref>", "start after this ref (exclusive)")
+    .option("--to <ref>", "end at this ref (inclusive)", "HEAD")
+    .action(async (opts: { from?: string; to: string }) => {
+      try {
+        const groups = await gatherChangelog(process.cwd(), opts.from, opts.to);
+        const heading = opts.to === "HEAD" ? "Unreleased" : opts.to;
+        console.log(formatChangelog(groups, heading));
+      } catch (err) {
+        console.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
     });
   return program;
 }

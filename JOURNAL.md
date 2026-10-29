@@ -123,3 +123,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: added `parseConventionalCommit` in new `src/conventional.ts` returning type, scope, breaking flag, description and body (or null for non-conventional subjects). Tests in `tests/conventional.test.ts`. Not wired into a command yet; the next changelog tasks consume it.
 - Decisions: type is lowercased; breaking is detected from `!` or a `BREAKING CHANGE:`/`BREAKING-CHANGE:` footer; empty scope becomes null. No new dependencies.
 - Next: `changelog`: group commits by type between two refs.
+
+## 2026-10-29
+
+- Done: `changelog --from <ref> --to <ref>` now prints a Markdown changelog grouping commits by Conventional Commit type (Features, Bug Fixes, ... , Other Changes). New `src/changelog.ts` (`groupCommits`, `formatChangelog`, `gatherChangelog`), tests in `tests/changelog.test.ts` including a real temp repo; README updated.
+- Decisions: `--from` is exclusive, `--to` inclusive and defaults to HEAD (heading "Unreleased" for HEAD, otherwise the ref name); non-conventional or unknown-type commits land under "Other Changes"; breaking changes are marked inline. No new dependencies.
+- Next: `changelog`: split by version tags, output Markdown.
