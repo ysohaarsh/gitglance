@@ -1,5 +1,5 @@
 import { parseConventionalCommit } from "./conventional.js";
-import { getCommits, type Commit } from "./git.js";
+import { getCommits, runGit, type Commit } from "./git.js";
 
 export interface ChangelogEntry {
   hash: string;
@@ -93,4 +93,52 @@ export async function gatherChangelog(
 ): Promise<ChangelogGroup[]> {
   const range = from ? `${from}..${to}` : to;
   return groupCommits(await getCommits(cwd, { range }));
+}
+
+export interface ChangelogSection {
+  heading: string;
+  groups: ChangelogGroup[];
+}
+
+/** Version-like tags (optional leading "v"), newest version first. */
+export async function listVersionTags(cwd: string): Promise<string[]> {
+  const out = await runGit(cwd, [
+    "tag",
+    "--list",
+    "--sort=-v:refname",
+    "--merged",
+    "HEAD",
+  ]);
+  return out
+    .split("\n")
+    .map((t) => t.trim())
+    .filter((t) => /^v?\d/.test(t));
+}
+
+/**
+ * One section per version tag (each covering the commits since the previous
+ * tag), preceded by "Unreleased" when HEAD has commits after the newest tag.
+ * Without tags the whole history is a single "Unreleased" section.
+ */
+export async function gatherChangelogByTag(
+  cwd: string,
+): Promise<ChangelogSection[]> {
+  const tags = await listVersionTags(cwd);
+  const sections: ChangelogSection[] = [];
+  const unreleased = await gatherChangelog(cwd, tags[0]);
+  if (unreleased.length > 0 || tags.length === 0) {
+    sections.push({ heading: "Unreleased", groups: unreleased });
+  }
+  for (const [i, tag] of tags.entries()) {
+    sections.push({
+      heading: tag,
+      groups: await gatherChangelog(cwd, tags[i + 1], tag),
+    });
+  }
+  return sections;
+}
+
+/** Render several sections as one Markdown document. */
+export function formatChangelogSections(sections: ChangelogSection[]): string {
+  return sections.map((s) => formatChangelog(s.groups, s.heading)).join("\n\n");
 }

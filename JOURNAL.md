@@ -129,3 +129,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `changelog --from <ref> --to <ref>` now prints a Markdown changelog grouping commits by Conventional Commit type (Features, Bug Fixes, ... , Other Changes). New `src/changelog.ts` (`groupCommits`, `formatChangelog`, `gatherChangelog`), tests in `tests/changelog.test.ts` including a real temp repo; README updated.
 - Decisions: `--from` is exclusive, `--to` inclusive and defaults to HEAD (heading "Unreleased" for HEAD, otherwise the ref name); non-conventional or unknown-type commits land under "Other Changes"; breaking changes are marked inline. No new dependencies.
 - Next: `changelog`: split by version tags, output Markdown.
+
+## 2026-10-30
+
+- Done: `changelog --by-tag` splits history into one Markdown section per version tag, newest first, with an "Unreleased" section for commits after the latest tag. New `listVersionTags`, `gatherChangelogByTag` and `formatChangelogSections` in `src/changelog.ts`; tests use real temp repos; README updated.
+- Decisions: only tags starting with an optional `v` and a digit count as versions, sorted with `git tag --sort=-v:refname` and limited to tags merged into HEAD; each section covers previous tag (exclusive) to its tag (inclusive); `--by-tag` is rejected together with `--from/--to`. No new dependencies.
+- Next: `changelog --write`: prepend to CHANGELOG.md.

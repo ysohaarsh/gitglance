@@ -5,7 +5,9 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   formatChangelog,
+  formatChangelogSections,
   gatherChangelog,
+  gatherChangelogByTag,
   groupCommits,
 } from "../src/changelog.js";
 import type { Commit } from "../src/git.js";
@@ -125,5 +127,73 @@ describe("gatherChangelog", () => {
 
     const upTo = await gatherChangelog(cwd, undefined, "v1");
     expect(upTo.map((g) => g.type)).toEqual(["feat"]);
+  });
+});
+
+function makeRepo(): {
+  cwd: string;
+  add: (n: string, m: string) => void;
+  run: (...a: string[]) => void;
+} {
+  const cwd = mkdtempSync(join(tmpdir(), "gitglance-cl-"));
+  const run = (...args: string[]): void => {
+    execFileSync("git", args, {
+      cwd,
+      env: {
+        ...process.env,
+        GIT_AUTHOR_NAME: "Ada",
+        GIT_AUTHOR_EMAIL: "ada@example.com",
+        GIT_COMMITTER_NAME: "Ada",
+        GIT_COMMITTER_EMAIL: "ada@example.com",
+      },
+    });
+  };
+  run("init", "-q", "-b", "main");
+  const add = (name: string, msg: string): void => {
+    writeFileSync(join(cwd, name), name);
+    run("add", name);
+    run("commit", "-q", "-m", msg);
+  };
+  return { cwd, add, run };
+}
+
+describe("gatherChangelogByTag", () => {
+  it("splits history by version tag, newest first", async () => {
+    const { cwd, add, run } = makeRepo();
+    add("a", "feat: one");
+    run("tag", "v0.9.0");
+    add("b", "fix: two");
+    run("tag", "v0.10.0");
+    run("tag", "not-a-version");
+    add("c", "docs: three");
+
+    const sections = await gatherChangelogByTag(cwd);
+    expect(sections.map((s) => s.heading)).toEqual([
+      "Unreleased",
+      "v0.10.0",
+      "v0.9.0",
+    ]);
+    expect(sections.map((s) => s.groups.map((g) => g.type))).toEqual([
+      ["docs"],
+      ["fix"],
+      ["feat"],
+    ]);
+    expect(formatChangelogSections(sections)).toContain("## v0.10.0");
+  });
+
+  it("omits Unreleased when HEAD is tagged", async () => {
+    const { cwd, add, run } = makeRepo();
+    add("a", "feat: one");
+    run("tag", "v1.0.0");
+    const sections = await gatherChangelogByTag(cwd);
+    expect(sections.map((s) => s.heading)).toEqual(["v1.0.0"]);
+  });
+
+  it("falls back to one Unreleased section without tags", async () => {
+    const { cwd, add } = makeRepo();
+    add("a", "feat: one");
+    const sections = await gatherChangelogByTag(cwd);
+    expect(sections.map((s) => s.heading)).toEqual(["Unreleased"]);
+    expect(sections[0]?.groups).toHaveLength(1);
   });
 });

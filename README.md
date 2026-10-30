@@ -67,6 +67,7 @@ npx gitglance health           # repo health report (README, LICENSE, .gitignore
 npx gitglance health --max-file-size 500   # flag tracked files >= 500 KB (default 1024)
 npx gitglance health --stale-days 30       # flag local branches idle for >= 30 days (default 90)
 npx gitglance changelog --from v1.0.0 --to HEAD   # Markdown changelog grouped by commit type
+npx gitglance changelog --by-tag   # one section per version tag (plus Unreleased)
 npx gitglance summary --days 7 # AI summary (needs ANTHROPIC_API_KEY)
 ```
 
