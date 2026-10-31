@@ -142,3 +142,33 @@ export async function gatherChangelogByTag(
 export function formatChangelogSections(sections: ChangelogSection[]): string {
   return sections.map((s) => formatChangelog(s.groups, s.heading)).join("\n\n");
 }
+
+const CHANGELOG_TITLE = "# Changelog";
+
+/** Split an existing changelog into its title-less body sections keyed by `## ` heading. */
+function splitSections(text: string): { heading: string; text: string }[] {
+  const body = text.startsWith(CHANGELOG_TITLE)
+    ? text.slice(CHANGELOG_TITLE.length)
+    : text;
+  const parts = body.split(/^(?=## )/m).filter((p) => p.trim() !== "");
+  return parts.map((p) => ({
+    heading: /^## (.*)$/m.exec(p)?.[1]?.trim() ?? "",
+    text: p.trim(),
+  }));
+}
+
+/**
+ * Prepend new sections to existing CHANGELOG.md text. A stale "Unreleased"
+ * section is replaced; sections whose heading already exists are not repeated.
+ */
+export function prependChangelog(
+  existing: string,
+  sections: ChangelogSection[],
+): string {
+  const old = splitSections(existing).filter((s) => s.heading !== "Unreleased");
+  const known = new Set(old.map((s) => s.heading));
+  const fresh = sections
+    .filter((s) => s.heading === "Unreleased" || !known.has(s.heading))
+    .map((s) => formatChangelog(s.groups, s.heading));
+  return `${[CHANGELOG_TITLE, ...fresh, ...old.map((s) => s.text)].join("\n\n")}\n`;
+}

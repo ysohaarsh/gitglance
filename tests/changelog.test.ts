@@ -9,6 +9,7 @@ import {
   gatherChangelog,
   gatherChangelogByTag,
   groupCommits,
+  prependChangelog,
 } from "../src/changelog.js";
 import type { Commit } from "../src/git.js";
 
@@ -195,5 +196,36 @@ describe("gatherChangelogByTag", () => {
     const sections = await gatherChangelogByTag(cwd);
     expect(sections.map((s) => s.heading)).toEqual(["Unreleased"]);
     expect(sections[0]?.groups).toHaveLength(1);
+  });
+});
+
+describe("prependChangelog", () => {
+  const section = (heading: string, desc: string) => ({
+    heading,
+    groups: groupCommits([commit("a".repeat(40), `feat: ${desc}`)]),
+  });
+
+  it("creates a titled changelog from nothing", () => {
+    const out = prependChangelog("", [section("v1.0.0", "one")]);
+    expect(out.startsWith("# Changelog\n\n## v1.0.0")).toBe(true);
+    expect(out.endsWith("\n")).toBe(true);
+  });
+
+  it("prepends new sections above old ones and skips duplicates", () => {
+    const first = prependChangelog("", [section("v1.0.0", "one")]);
+    const out = prependChangelog(first, [
+      section("v1.1.0", "two"),
+      section("v1.0.0", "one"),
+    ]);
+    expect(out.indexOf("## v1.1.0")).toBeLessThan(out.indexOf("## v1.0.0"));
+    expect(out.match(/## v1\.0\.0/g)).toHaveLength(1);
+  });
+
+  it("replaces a stale Unreleased section", () => {
+    const first = prependChangelog("", [section("Unreleased", "old")]);
+    const out = prependChangelog(first, [section("Unreleased", "new")]);
+    expect(out).toContain("new");
+    expect(out).not.toContain("old");
+    expect(out.match(/## Unreleased/g)).toHaveLength(1);
   });
 });

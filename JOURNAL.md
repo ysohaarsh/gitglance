@@ -135,3 +135,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `changelog --by-tag` splits history into one Markdown section per version tag, newest first, with an "Unreleased" section for commits after the latest tag. New `listVersionTags`, `gatherChangelogByTag` and `formatChangelogSections` in `src/changelog.ts`; tests use real temp repos; README updated.
 - Decisions: only tags starting with an optional `v` and a digit count as versions, sorted with `git tag --sort=-v:refname` and limited to tags merged into HEAD; each section covers previous tag (exclusive) to its tag (inclusive); `--by-tag` is rejected together with `--from/--to`. No new dependencies.
 - Next: `changelog --write`: prepend to CHANGELOG.md.
+
+## 2026-10-31
+
+- Done: `changelog --write` generates the per-tag changelog and prepends it to `CHANGELOG.md` (created with a `# Changelog` title if missing). New `prependChangelog` in `src/changelog.ts`; tests cover creation, prepending, duplicate skipping and Unreleased replacement; README updated.
+- Decisions: `--write` implies `--by-tag` and is rejected with `--from/--to`; an existing "Unreleased" section is replaced on each run, and sections whose heading already exists are not repeated, so the command is idempotent. No new dependencies.
+- Next: `summary`: call Claude API to summarize last N days of commits, with a graceful message without ANTHROPIC_API_KEY.

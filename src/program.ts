@@ -1,9 +1,12 @@
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { Command } from "commander";
 import {
   formatChangelog,
   formatChangelogSections,
   gatherChangelog,
   gatherChangelogByTag,
+  prependChangelog,
 } from "./changelog.js";
 import { formatChurn, gatherChurn } from "./churn.js";
 import { computeActivity, formatActivity } from "./activity.js";
@@ -140,23 +143,46 @@ export function buildProgram(): Command {
     ?.option("--from <ref>", "start after this ref (exclusive)")
     .option("--to <ref>", "end at this ref (inclusive)", "HEAD")
     .option("--by-tag", "split into one section per version tag")
-    .action(async (opts: { from?: string; to: string; byTag?: boolean }) => {
-      try {
-        if (opts.byTag) {
-          if (opts.from || opts.to !== "HEAD") {
-            throw new Error("--by-tag cannot be combined with --from/--to");
+    .option("--write", "prepend the result to CHANGELOG.md (implies --by-tag)")
+    .action(
+      async (opts: {
+        from?: string;
+        to: string;
+        byTag?: boolean;
+        write?: boolean;
+      }) => {
+        try {
+          if (opts.write) {
+            if (opts.from || opts.to !== "HEAD") {
+              throw new Error("--write cannot be combined with --from/--to");
+            }
+            const file = join(process.cwd(), "CHANGELOG.md");
+            const existing = existsSync(file) ? readFileSync(file, "utf8") : "";
+            const sections = await gatherChangelogByTag(process.cwd());
+            writeFileSync(file, prependChangelog(existing, sections));
+            console.log("Updated CHANGELOG.md");
+            return;
           }
-          const sections = await gatherChangelogByTag(process.cwd());
-          console.log(formatChangelogSections(sections));
-          return;
+          if (opts.byTag) {
+            if (opts.from || opts.to !== "HEAD") {
+              throw new Error("--by-tag cannot be combined with --from/--to");
+            }
+            const sections = await gatherChangelogByTag(process.cwd());
+            console.log(formatChangelogSections(sections));
+            return;
+          }
+          const groups = await gatherChangelog(
+            process.cwd(),
+            opts.from,
+            opts.to,
+          );
+          const heading = opts.to === "HEAD" ? "Unreleased" : opts.to;
+          console.log(formatChangelog(groups, heading));
+        } catch (err) {
+          console.error(err instanceof Error ? err.message : String(err));
+          process.exitCode = 1;
         }
-        const groups = await gatherChangelog(process.cwd(), opts.from, opts.to);
-        const heading = opts.to === "HEAD" ? "Unreleased" : opts.to;
-        console.log(formatChangelog(groups, heading));
-      } catch (err) {
-        console.error(err instanceof Error ? err.message : String(err));
-        process.exitCode = 1;
-      }
-    });
+      },
+    );
   return program;
 }
