@@ -1,6 +1,6 @@
 {
   "name": "gitglance",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Analyze git repositories: activity stats, health checks, changelogs and AI summaries",
   "type": "module",
   "license": "MIT",
