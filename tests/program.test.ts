@@ -40,7 +40,8 @@ describe("program", () => {
   });
 
   it("documents the summary --days option", () => {
-    expect(run(["summary", "--help"]).out).toContain("--days <n>");
+    const summary = buildProgram().commands.find((c) => c.name() === "summary");
+    expect(summary?.helpInformation()).toContain("--days <n>");
   });
 
   it("rejects unknown commands", () => {
