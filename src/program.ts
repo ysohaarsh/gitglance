@@ -18,6 +18,7 @@ import {
   checkTodos,
   formatHealth,
 } from "./health.js";
+import { summarize } from "./summary.js";
 import { buildJsonReport } from "./report.js";
 import { VERSION } from "./version.js";
 
@@ -184,5 +185,21 @@ export function buildProgram(): Command {
         }
       },
     );
+
+  program.commands
+    .find((c) => c.name() === "summary")
+    ?.option("--days <n>", "summarize commits from the last N days", "7")
+    .action(async (opts: { days: string }) => {
+      try {
+        const days = Number(opts.days);
+        if (!Number.isInteger(days) || days <= 0) {
+          throw new Error("--days must be a positive integer");
+        }
+        console.log(await summarize(process.cwd(), days));
+      } catch (err) {
+        console.error(err instanceof Error ? err.message : String(err));
+        process.exitCode = 1;
+      }
+    });
   return program;
 }

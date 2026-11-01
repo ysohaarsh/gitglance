@@ -141,3 +141,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `changelog --write` generates the per-tag changelog and prepends it to `CHANGELOG.md` (created with a `# Changelog` title if missing). New `prependChangelog` in `src/changelog.ts`; tests cover creation, prepending, duplicate skipping and Unreleased replacement; README updated.
 - Decisions: `--write` implies `--by-tag` and is rejected with `--from/--to`; an existing "Unreleased" section is replaced on each run, and sections whose heading already exists are not repeated, so the command is idempotent. No new dependencies.
 - Next: `summary`: call Claude API to summarize last N days of commits, with a graceful message without ANTHROPIC_API_KEY.
+
+## 2026-11-01
+
+- Done: `summary --days <n>` (default 7) sends recent commit subjects to the Claude Messages API and prints the reply. New `src/summary.ts` (`buildPrompt`, `requestSummary`, `summarize`) using the built-in `fetch`; without `ANTHROPIC_API_KEY` it prints a setup hint and exits 0. Tests mock fetch and use a temp repo; README updated.
+- Decisions: no SDK dependency (single POST request); `fetch` is injectable for tests; at most 200 commits are sent; default model `claude-haiku-5-5` for low cost. API errors exit 1 with a message.
+- Next: colored terminal output (respect NO_COLOR).
