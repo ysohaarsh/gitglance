@@ -39,8 +39,8 @@ describe("program", () => {
     }
   });
 
-  it("runs subcommand stubs", () => {
-    expect(run(["summary"]).out).toContain("summary: not implemented yet");
+  it("documents the summary --days option", () => {
+    expect(run(["summary", "--help"]).out).toContain("--days <n>");
   });
 
   it("rejects unknown commands", () => {
