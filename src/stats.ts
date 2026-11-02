@@ -1,3 +1,4 @@
+import { plain, type Painter } from "./color.js";
 import {
   type Commit,
   getCommits,
@@ -51,11 +52,14 @@ export function topContributors(
     .slice(0, Math.max(0, limit));
 }
 
-export function formatContributors(list: Contributor[]): string {
+export function formatContributors(
+  list: Contributor[],
+  paint: Painter = plain,
+): string {
   if (list.length === 0) return "";
   const width = String(list[0]?.commits ?? 0).length;
   return [
-    "Top contributors:",
+    paint.bold("Top contributors:"),
     ...list.map((c) => `  ${String(c.commits).padStart(width)}  ${c.name}`),
   ].join("\n");
 }
@@ -64,12 +68,12 @@ function day(iso: string | null): string {
   return iso ? iso.slice(0, 10) : "n/a";
 }
 
-export function formatStats(stats: RepoStats): string {
+export function formatStats(stats: RepoStats, paint: Painter = plain): string {
   return [
-    `Commits:      ${stats.totalCommits}`,
-    `First commit: ${day(stats.firstCommitDate)}`,
-    `Last commit:  ${day(stats.lastCommitDate)}`,
-    `Contributors: ${stats.contributors}`,
+    `${paint.dim("Commits:     ")} ${stats.totalCommits}`,
+    `${paint.dim("First commit:")} ${day(stats.firstCommitDate)}`,
+    `${paint.dim("Last commit: ")} ${day(stats.lastCommitDate)}`,
+    `${paint.dim("Contributors:")} ${stats.contributors}`,
   ].join("\n");
 }
 

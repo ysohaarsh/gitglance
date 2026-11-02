@@ -59,6 +59,10 @@ Add `--json` to print everything (stats, contributors, hotspots, weekday/hour ac
 npx gitglance stats --json | jq .stats.totalCommits
 ```
 
+### Color
+
+`stats` and `health` output is colored when stdout is a terminal. Set `NO_COLOR` to disable it, or `FORCE_COLOR=1` to force it (for example when piping into `less -R`). `--json` and `changelog` output are never colored.
+
 ## Planned usage
 
 ```bash

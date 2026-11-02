@@ -1,5 +1,6 @@
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { plain, type Painter } from "./color.js";
 import { runGit } from "./git.js";
 
 export interface HealthCheck {
@@ -226,19 +227,31 @@ export function computeScore(checks: HealthCheck[]): HealthScore {
   return { score: Math.round((earned / total) * 100), deductions };
 }
 
-export function formatHealth(checks: HealthCheck[]): string {
+export function formatHealth(
+  checks: HealthCheck[],
+  paint: Painter = plain,
+): string {
   const width = Math.max(...checks.map((c) => c.name.length));
   const rows = checks.map(
     (c) =>
-      `${c.passed ? "PASS" : "FAIL"}  ${c.name.padEnd(width)}  ${c.detail}`,
+      `${c.passed ? paint.green("PASS") : paint.red("FAIL")}  ${c.name.padEnd(width)}  ${c.detail}`,
   );
   const passed = checks.filter((c) => c.passed).length;
   const { score, deductions } = computeScore(checks);
+  const scoreText = `Score: ${score}/100`;
+  const colored =
+    score >= 80
+      ? paint.green(scoreText)
+      : score >= 50
+        ? paint.yellow(scoreText)
+        : paint.red(scoreText);
   return [
-    "Health checks",
+    paint.bold("Health checks"),
     ...rows,
     `${passed}/${checks.length} checks passed`,
-    `Score: ${score}/100`,
-    ...(deductions.length > 0 ? ["Points lost:", ...deductions] : []),
+    colored,
+    ...(deductions.length > 0
+      ? [paint.bold("Points lost:"), ...deductions.map((d) => paint.red(d))]
+      : []),
   ].join("\n");
 }

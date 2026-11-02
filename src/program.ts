@@ -18,6 +18,7 @@ import {
   checkTodos,
   formatHealth,
 } from "./health.js";
+import { createPainter, shouldColor } from "./color.js";
 import { summarize } from "./summary.js";
 import { buildJsonReport } from "./report.js";
 import { VERSION } from "./version.js";
@@ -89,10 +90,11 @@ export function buildProgram(): Command {
             );
             return;
           }
+          const paint = createPainter(shouldColor());
           console.log(
             [
-              formatStats(stats),
-              formatContributors(top),
+              formatStats(stats, paint),
+              formatContributors(top, paint),
               opts.hotspots
                 ? formatChurn(await gatherChurn(process.cwd(), limit, range))
                 : "",
@@ -136,7 +138,7 @@ export function buildProgram(): Command {
         await checkStaleBranches(cwd, days),
         await checkTodos(cwd),
       ];
-      console.log(formatHealth(checks));
+      console.log(formatHealth(checks, createPainter(shouldColor())));
     });
 
   program.commands

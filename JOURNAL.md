@@ -147,3 +147,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `summary --days <n>` (default 7) sends recent commit subjects to the Claude Messages API and prints the reply. New `src/summary.ts` (`buildPrompt`, `requestSummary`, `summarize`) using the built-in `fetch`; without `ANTHROPIC_API_KEY` it prints a setup hint and exits 0. Tests mock fetch and use a temp repo; README updated.
 - Decisions: no SDK dependency (single POST request); `fetch` is injectable for tests; at most 200 commits are sent; default model `claude-haiku-5-5` for low cost. API errors exit 1 with a message.
 - Next: colored terminal output (respect NO_COLOR).
+
+## 2026-11-02
+
+- Done: colored terminal output for `stats` and `health`. New `src/color.ts` (`shouldColor`, `createPainter`, no-op `plain` painter); `formatHealth`, `formatStats` and `formatContributors` take an optional painter (PASS green, FAIL red, score green/yellow/red by value, headings bold). Tests in `tests/color.test.ts`; README documents NO_COLOR/FORCE_COLOR.
+- Decisions: hand-rolled ANSI codes instead of a dependency; formatters stay pure and default to uncolored so existing tests and piped output are unchanged; NO_COLOR wins over FORCE_COLOR; `--json` and changelog are never colored. Chart and hotspot output not colored yet.
+- Next: config file support (`.gitglancerc.json`).
