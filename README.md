@@ -63,6 +63,22 @@ npx gitglance stats --json | jq .stats.totalCommits
 
 `stats` and `health` output is colored when stdout is a terminal. Set `NO_COLOR` to disable it, or `FORCE_COLOR=1` to force it (for example when piping into `less -R`). `--json` and `changelog` output are never colored.
 
+### Config file
+
+Put a `.gitglancerc.json` in the repository root to set defaults. Command-line flags always win.
+
+```json
+{
+  "limit": 10,
+  "since": "2024-01-01",
+  "staleDays": 60,
+  "maxFileSize": 512,
+  "days": 14
+}
+```
+
+Supported keys: `limit`, `since`, `until` (stats), `maxFileSize`, `staleDays` (health) and `days` (summary). Unknown keys or wrong types produce an error.
+
 ## Planned usage
 
 ```bash

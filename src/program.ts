@@ -21,6 +21,7 @@ import {
 import { createPainter, shouldColor } from "./color.js";
 import { summarize } from "./summary.js";
 import { buildJsonReport } from "./report.js";
+import { loadConfig } from "./config.js";
 import { VERSION } from "./version.js";
 
 interface Subcommand {
@@ -34,6 +35,22 @@ const SUBCOMMANDS: Subcommand[] = [
   { name: "changelog", description: "Generate a changelog from commits" },
   { name: "summary", description: "Summarize recent work with AI (optional)" },
 ];
+
+/** Numeric option: explicit CLI flag wins, then config file, then default. */
+function fromConfig(
+  cmd: Command,
+  name: string,
+  cliValue: string,
+  configValue: number | undefined,
+): number {
+  if (
+    configValue !== undefined &&
+    cmd.getOptionValueSource(name) === "default"
+  ) {
+    return configValue;
+  }
+  return Number(cliValue);
+}
 
 export function buildProgram(): Command {
   const program = new Command();
@@ -60,16 +77,22 @@ export function buildProgram(): Command {
     .option("--until <date>", "only count commits before this date")
     .option("--json", "print all stats as JSON")
     .action(
-      async (opts: {
-        limit: string;
-        charts?: boolean;
-        hotspots?: boolean;
-        json?: boolean;
-        since?: string;
-        until?: string;
-      }) => {
+      async (
+        opts: {
+          limit: string;
+          charts?: boolean;
+          hotspots?: boolean;
+          json?: boolean;
+          since?: string;
+          until?: string;
+        },
+        cmd: Command,
+      ) => {
         try {
-          const limit = Number(opts.limit);
+          const config = loadConfig(process.cwd());
+          const limit = fromConfig(cmd, "limit", opts.limit, config.limit);
+          opts.since ??= config.since;
+          opts.until ??= config.until;
           if (!Number.isInteger(limit) || limit < 0) {
             throw new Error("--limit must be a non-negative integer");
           }
@@ -122,24 +145,40 @@ export function buildProgram(): Command {
       "flag branches with no commits in this many days",
       "90",
     )
-    .action(async (opts: { maxFileSize: string; staleDays: string }) => {
-      const kb = Number(opts.maxFileSize);
-      if (!Number.isFinite(kb) || kb <= 0) {
-        throw new Error("--max-file-size must be a positive number of KB");
-      }
-      const days = Number(opts.staleDays);
-      if (!Number.isFinite(days) || days <= 0) {
-        throw new Error("--stale-days must be a positive number of days");
-      }
-      const cwd = process.cwd();
-      const checks = [
-        ...checkBasics(cwd),
-        await checkLargeFiles(cwd, kb),
-        await checkStaleBranches(cwd, days),
-        await checkTodos(cwd),
-      ];
-      console.log(formatHealth(checks, createPainter(shouldColor())));
-    });
+    .action(
+      async (
+        opts: { maxFileSize: string; staleDays: string },
+        cmd: Command,
+      ) => {
+        const config = loadConfig(process.cwd());
+        const kb = fromConfig(
+          cmd,
+          "maxFileSize",
+          opts.maxFileSize,
+          config.maxFileSize,
+        );
+        if (!Number.isFinite(kb) || kb <= 0) {
+          throw new Error("--max-file-size must be a positive number of KB");
+        }
+        const days = fromConfig(
+          cmd,
+          "staleDays",
+          opts.staleDays,
+          config.staleDays,
+        );
+        if (!Number.isFinite(days) || days <= 0) {
+          throw new Error("--stale-days must be a positive number of days");
+        }
+        const cwd = process.cwd();
+        const checks = [
+          ...checkBasics(cwd),
+          await checkLargeFiles(cwd, kb),
+          await checkStaleBranches(cwd, days),
+          await checkTodos(cwd),
+        ];
+        console.log(formatHealth(checks, createPainter(shouldColor())));
+      },
+    );
 
   program.commands
     .find((c) => c.name() === "changelog")
@@ -191,9 +230,10 @@ export function buildProgram(): Command {
   program.commands
     .find((c) => c.name() === "summary")
     ?.option("--days <n>", "summarize commits from the last N days", "7")
-    .action(async (opts: { days: string }) => {
+    .action(async (opts: { days: string }, cmd: Command) => {
       try {
-        const days = Number(opts.days);
+        const config = loadConfig(process.cwd());
+        const days = fromConfig(cmd, "days", opts.days, config.days);
         if (!Number.isInteger(days) || days <= 0) {
           throw new Error("--days must be a positive integer");
         }
