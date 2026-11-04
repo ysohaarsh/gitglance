@@ -40,5 +40,5 @@ Tasks are done top to bottom, one per day. Edit freely to steer the project.
 - [x] `summary`: call Claude API (ANTHROPIC_API_KEY) to summarize last N days of commits; graceful message if no key
 - [x] Colored, well-formatted terminal output (respect NO_COLOR)
 - [x] Config file support (`.gitglancerc.json`)
-- [ ] Full README usage docs with example output
+- [x] Full README usage docs with example output
 - [ ] Prepare npm publish (files, bin, keywords, prepublish build)

@@ -159,3 +159,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `.gitglancerc.json` support. New `src/config.ts` (`parseConfig`, `loadConfig`) validates keys `limit`, `since`, `until`, `maxFileSize`, `staleDays`, `days`; `stats`, `health` and `summary` use them as defaults. Tests in `tests/config.test.ts`; README documents the file.
 - Decisions: precedence is CLI flag > config > built-in default, detected via commander's option value source; unknown keys and wrong types are hard errors so typos are not silently ignored; config is read from the current directory only (no upward search). No new dependencies.
 - Next: full README usage docs with example output.
+
+## 2026-11-04
+
+- Done: replaced the README "Planned usage" block with real docs: install, and per-command sections for `health`, `changelog` and `summary` with example output captured from the actual CLI.
+- Decisions: docs-only change, no code or tests touched; examples use real output from this repo. No new dependencies.
+- Next: prepare npm publish (files, bin, keywords, prepublish build).

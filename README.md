@@ -79,18 +79,61 @@ Put a `.gitglancerc.json` in the repository root to set defaults. Command-line f
 
 Supported keys: `limit`, `since`, `until` (stats), `maxFileSize`, `staleDays` (health) and `days` (summary). Unknown keys or wrong types produce an error.
 
-## Planned usage
+## Install
 
 ```bash
-npx gitglance stats            # commits, first/last date, contributors
-npx gitglance health           # repo health report (README, LICENSE, .gitignore, CI, large files, stale branches, TODO/FIXME) with a 0-100 score
+npx gitglance --help     # run without installing
+npm install -g gitglance # or install globally (Node 22+)
+```
+
+Run every command from inside the git repository you want to analyze.
+
+### `health`
+
+```
+Health checks
+PASS  README          README.md
+PASS  LICENSE         LICENSE
+PASS  .gitignore      .gitignore
+PASS  CI config       .github/workflows
+PASS  Large files     none over 1024 KB
+PASS  Stale branches  none older than 90 days
+FAIL  TODO/FIXME      12 in 5 files: src/health.ts (4), JOURNAL.md (3), README.md (2), +2 more
+6/7 checks passed
+Score: 80/100
+Points lost:
+-20  TODO/FIXME: 12 in 5 files: src/health.ts (4), JOURNAL.md (3), README.md (2), +2 more
+```
+
+```bash
 npx gitglance health --max-file-size 500   # flag tracked files >= 500 KB (default 1024)
 npx gitglance health --stale-days 30       # flag local branches idle for >= 30 days (default 90)
+```
+
+### `changelog`
+
+```
+## Unreleased
+
+### Features
+
+- support .gitglancerc.json defaults for stats, health and summary (764181d)
+```
+
+```bash
 npx gitglance changelog --from v1.0.0 --to HEAD   # Markdown changelog grouped by commit type
 npx gitglance changelog --by-tag   # one section per version tag (plus Unreleased)
 npx gitglance changelog --write    # prepend new sections to CHANGELOG.md (Unreleased is refreshed)
-npx gitglance summary --days 7 # AI summary of recent commits (needs ANTHROPIC_API_KEY; prints a hint if unset)
 ```
+
+### `summary`
+
+```bash
+export ANTHROPIC_API_KEY=...
+npx gitglance summary --days 7   # AI summary of the last 7 days of commits
+```
+
+Without `ANTHROPIC_API_KEY` the command prints a setup hint and exits 0; nothing is sent anywhere.
 
 ## License
 
