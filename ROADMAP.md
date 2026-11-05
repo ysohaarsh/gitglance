@@ -41,4 +41,12 @@ Tasks are done top to bottom, one per day. Edit freely to steer the project.
 - [x] Colored, well-formatted terminal output (respect NO_COLOR)
 - [x] Config file support (`.gitglancerc.json`)
 - [x] Full README usage docs with example output
-- [ ] Prepare npm publish (files, bin, keywords, prepublish build)
+- [x] Prepare npm publish (files, bin, keywords, prepublish build)
+
+## Phase 6: follow-ups
+
+- [ ] Exclude source maps and tests from the published tarball; add a `npm pack --dry-run` check to CI
+- [ ] `stats --format csv` output for contributors and hotspots
+- [ ] Color the weekday/hour charts and churn hotspots
+- [ ] `health`: detect missing CONTRIBUTING/SECURITY files as optional checks
+- [ ] Search parent directories for `.gitglancerc.json`

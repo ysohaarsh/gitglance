@@ -165,3 +165,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: replaced the README "Planned usage" block with real docs: install, and per-command sections for `health`, `changelog` and `summary` with example output captured from the actual CLI.
 - Decisions: docs-only change, no code or tests touched; examples use real output from this repo. No new dependencies.
 - Next: prepare npm publish (files, bin, keywords, prepublish build).
+
+## 2026-11-05
+
+- Done: prepared npm publish. Added `keywords`, `author` and `publishConfig.access` to package.json; `prepublishOnly` now cleans, builds and runs tests. New `tests/package.test.ts` guards the publish metadata and the CLI shebang. Verified with `npm pack --dry-run` (45 files, 25.5 kB, shebang preserved in `dist/cli.js`).
+- Decisions: `files` stays `["dist"]` (README, LICENSE and package.json are always included by npm); no new dependencies; version left at 0.1.0 since release-please manages it. Actual `npm publish` is not run.
+- Next: roadmap phases 1-5 are complete; added Phase 6 follow-ups, starting with trimming the tarball (source maps) and a pack check in CI.
