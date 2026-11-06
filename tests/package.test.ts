@@ -16,6 +16,11 @@ describe("package.json publish metadata", () => {
     expect(pkg.files).toContain("dist");
   });
 
+  it("excludes source maps from the tarball", () => {
+    expect(pkg.files).toContain("!dist/**/*.map");
+    expect(pkg.scripts["check:pack"]).toContain("check-pack");
+  });
+
   it("has keywords and an author", () => {
     expect(pkg.keywords.length).toBeGreaterThan(3);
     expect(pkg.author).toBeTruthy();

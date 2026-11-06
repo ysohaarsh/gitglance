@@ -45,7 +45,7 @@ Tasks are done top to bottom, one per day. Edit freely to steer the project.
 
 ## Phase 6: follow-ups
 
-- [ ] Exclude source maps and tests from the published tarball; add a `npm pack --dry-run` check to CI
+- [x] Exclude source maps and tests from the published tarball; add a `npm pack --dry-run` check to CI
 - [ ] `stats --format csv` output for contributors and hotspots
 - [ ] Color the weekday/hour charts and churn hotspots
 - [ ] `health`: detect missing CONTRIBUTING/SECURITY files as optional checks

@@ -18,7 +18,8 @@
     "gitglance": "./dist/cli.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "!dist/**/*.map"
   ],
   "engines": {
     "node": ">=22"
@@ -26,6 +27,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "vitest run",
+    "check:pack": "node scripts/check-pack.mjs",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run clean && npm run build && npm test",
     "lint": "eslint . && prettier --check .",

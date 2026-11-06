@@ -171,3 +171,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: prepared npm publish. Added `keywords`, `author` and `publishConfig.access` to package.json; `prepublishOnly` now cleans, builds and runs tests. New `tests/package.test.ts` guards the publish metadata and the CLI shebang. Verified with `npm pack --dry-run` (45 files, 25.5 kB, shebang preserved in `dist/cli.js`).
 - Decisions: `files` stays `["dist"]` (README, LICENSE and package.json are always included by npm); no new dependencies; version left at 0.1.0 since release-please manages it. Actual `npm publish` is not run.
 - Next: roadmap phases 1-5 are complete; added Phase 6 follow-ups, starting with trimming the tarball (source maps) and a pack check in CI.
+
+## 2026-11-06
+
+- Done: trimmed the published tarball. `files` now excludes `dist/**/*.map` (31 files, ~17 kB). New `scripts/check-pack.mjs` (`npm run check:pack`) runs `npm pack --dry-run --json` and fails on source maps, test files or anything outside `dist/` plus package.json/README/LICENSE; wired into CI after tests. Package test updated.
+- Decisions: tests were already outside the tarball because `files` is an allowlist and tsc only compiles `src`, so the check guards against regressions; source maps stay generated locally for debugging; no new dependencies.
+- Next: `stats --format csv` for contributors and hotspots.
