@@ -9,6 +9,7 @@ import {
   prependChangelog,
 } from "./changelog.js";
 import { formatChurn, gatherChurn } from "./churn.js";
+import { formatCsv } from "./csv.js";
 import { computeActivity, formatActivity } from "./activity.js";
 import { formatContributors, formatStats, gatherReport } from "./stats.js";
 import {
@@ -76,6 +77,11 @@ export function buildProgram(): Command {
     .option("--since <date>", "only count commits after this date")
     .option("--until <date>", "only count commits before this date")
     .option("--json", "print all stats as JSON")
+    .option(
+      "--format <format>",
+      "output format: text, json or csv (contributors and hotspots)",
+      "text",
+    )
     .action(
       async (
         opts: {
@@ -83,6 +89,7 @@ export function buildProgram(): Command {
           charts?: boolean;
           hotspots?: boolean;
           json?: boolean;
+          format: string;
           since?: string;
           until?: string;
         },
@@ -96,13 +103,22 @@ export function buildProgram(): Command {
           if (!Number.isInteger(limit) || limit < 0) {
             throw new Error("--limit must be a non-negative integer");
           }
+          if (!["text", "json", "csv"].includes(opts.format)) {
+            throw new Error("--format must be one of: text, json, csv");
+          }
+          const format = opts.json ? "json" : opts.format;
           const range = { since: opts.since, until: opts.until };
           const { stats, top, commits } = await gatherReport(
             process.cwd(),
             limit,
             range,
           );
-          if (opts.json) {
+          if (format === "csv") {
+            const hotspots = await gatherChurn(process.cwd(), limit, range);
+            console.log(formatCsv(top, hotspots));
+            return;
+          }
+          if (format === "json") {
             const hotspots = await gatherChurn(process.cwd(), limit, range);
             console.log(
               JSON.stringify(

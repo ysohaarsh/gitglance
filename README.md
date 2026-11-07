@@ -59,6 +59,12 @@ Add `--json` to print everything (stats, contributors, hotspots, weekday/hour ac
 npx gitglance stats --json | jq .stats.totalCommits
 ```
 
+Use `--format csv` to export contributors and hotspots as a single table (`section,name,email,commits`) for spreadsheets. `--limit` and `--since`/`--until` apply; `--json` is shorthand for `--format json`.
+
+```bash
+npx gitglance stats --format csv > stats.csv
+```
+
 ### Color
 
 `stats` and `health` output is colored when stdout is a terminal. Set `NO_COLOR` to disable it, or `FORCE_COLOR=1` to force it (for example when piping into `less -R`). `--json` and `changelog` output are never colored.

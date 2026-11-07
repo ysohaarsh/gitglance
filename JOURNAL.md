@@ -177,3 +177,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: trimmed the published tarball. `files` now excludes `dist/**/*.map` (31 files, ~17 kB). New `scripts/check-pack.mjs` (`npm run check:pack`) runs `npm pack --dry-run --json` and fails on source maps, test files or anything outside `dist/` plus package.json/README/LICENSE; wired into CI after tests. Package test updated.
 - Decisions: tests were already outside the tarball because `files` is an allowlist and tsc only compiles `src`, so the check guards against regressions; source maps stay generated locally for debugging; no new dependencies.
 - Next: `stats --format csv` for contributors and hotspots.
+
+## 2026-11-07
+
+- Done: `stats --format <text|json|csv>`. New `src/csv.ts` (`csvField`, `formatCsv`) emits one RFC 4180 table `section,name,email,commits` covering contributors and hotspots; `--json` stays as shorthand for `--format json`. Invalid formats are a hard error. Tests in `tests/csv.test.ts`; README documents it.
+- Decisions: single combined table with a `section` column rather than two CSVs so output stays one pipeable stream; no new dependencies.
+- Next: color the weekday/hour charts and churn hotspots.
