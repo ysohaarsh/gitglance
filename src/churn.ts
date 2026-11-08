@@ -1,3 +1,4 @@
+import { plain, type Painter } from "./color.js";
 import { hasCommits, isGitRepo, type LogOptions, runGit } from "./git.js";
 
 export interface FileChurn {
@@ -27,12 +28,17 @@ export function topChurn(
     .slice(0, Math.max(0, limit));
 }
 
-export function formatChurn(list: FileChurn[]): string {
+export function formatChurn(list: FileChurn[], paint: Painter = plain): string {
   if (list.length === 0) return "";
   const width = String(list[0]?.commits ?? 0).length;
   return [
-    "Most-changed files:",
-    ...list.map((f) => `  ${String(f.commits).padStart(width)}  ${f.path}`),
+    paint.bold("Most-changed files:"),
+    ...list.map((f, i) => {
+      const count = String(f.commits).padStart(width);
+      // The single hottest file stands out; the rest are green.
+      const shown = i === 0 ? paint.yellow(count) : paint.green(count);
+      return `  ${shown}  ${f.path}`;
+    }),
   ].join("\n");
 }
 

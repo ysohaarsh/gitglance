@@ -183,3 +183,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `stats --format <text|json|csv>`. New `src/csv.ts` (`csvField`, `formatCsv`) emits one RFC 4180 table `section,name,email,commits` covering contributors and hotspots; `--json` stays as shorthand for `--format json`. Invalid formats are a hard error. Tests in `tests/csv.test.ts`; README documents it.
 - Decisions: single combined table with a `section` column rather than two CSVs so output stays one pipeable stream; no new dependencies.
 - Next: color the weekday/hour charts and churn hotspots.
+
+## 2026-11-08
+
+- Done: colored the `stats --charts` weekday/hour bars and the churn hotspots list. `formatActivity` and `formatChurn` take an optional `Painter` (default `plain`); the busiest bar and hottest file are yellow, other bars/counts green, labels dim, headings bold. `stats` passes its existing painter. Tests cover colored output and that stripping ANSI yields the plain output.
+- Decisions: padding is applied before painting so alignment is unaffected; no new Painter methods or dependencies; JSON/CSV output is untouched.
+- Next: `health` optional CONTRIBUTING/SECURITY checks.

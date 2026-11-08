@@ -1,3 +1,4 @@
+import { plain, type Painter } from "./color.js";
 import type { Commit } from "./git.js";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -29,24 +30,31 @@ export function computeActivity(commits: Commit[]): Activity {
   return { weekdays, hours };
 }
 
-function bars(labels: string[], counts: number[]): string[] {
+function bars(labels: string[], counts: number[], paint: Painter): string[] {
   const max = Math.max(0, ...counts);
   const width = String(max).length;
   return labels.map((label, i) => {
     const n = counts[i] ?? 0;
     const len = max === 0 ? 0 : Math.round((n / max) * BAR_WIDTH);
     const bar = "█".repeat(n > 0 ? Math.max(1, len) : 0);
-    return `  ${label} ${bar.padEnd(BAR_WIDTH)} ${String(n).padStart(width)}`;
+    // Pad before painting so ANSI codes do not break alignment.
+    const pad = " ".repeat(BAR_WIDTH - bar.length);
+    const colored = n > 0 && n === max ? paint.yellow(bar) : paint.green(bar);
+    const count = String(n).padStart(width);
+    return `  ${paint.dim(label)} ${bar ? colored : ""}${pad} ${n === 0 ? paint.dim(count) : count}`;
   });
 }
 
-export function formatActivity(activity: Activity): string {
+export function formatActivity(
+  activity: Activity,
+  paint: Painter = plain,
+): string {
   const hourLabels = activity.hours.map((_, h) => String(h).padStart(2, "0"));
   return [
-    "Commits by weekday:",
-    ...bars(WEEKDAYS, activity.weekdays),
+    paint.bold("Commits by weekday:"),
+    ...bars(WEEKDAYS, activity.weekdays, paint),
     "",
-    "Commits by hour:",
-    ...bars(hourLabels, activity.hours),
+    paint.bold("Commits by hour:"),
+    ...bars(hourLabels, activity.hours, paint),
   ].join("\n");
 }

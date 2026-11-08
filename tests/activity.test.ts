@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Commit } from "../src/git.js";
 import { computeActivity, formatActivity } from "../src/activity.js";
+import { createPainter } from "../src/color.js";
 
 function at(date: string): Commit {
   return {
@@ -48,5 +49,26 @@ describe("formatActivity", () => {
     expect(lines[2]).toMatch(/^ {2}Tue █{15} +1$/);
     expect(lines[3]).toMatch(/^ {2}Wed +0$/);
     expect(out).toContain("Commits by hour:");
+  });
+});
+
+describe("formatActivity color", () => {
+  const paint = createPainter(true);
+  const a = computeActivity([
+    at("2026-10-19T09:00:00Z"),
+    at("2026-10-19T09:30:00Z"),
+    at("2026-10-20T10:00:00Z"),
+  ]);
+
+  it("colors the busiest bar yellow and others green", () => {
+    const lines = formatActivity(a, paint).split("\n");
+    expect(lines[1]).toContain(`\u001b[33m${"█".repeat(30)}\u001b[39m`);
+    expect(lines[2]).toContain(`\u001b[32m${"█".repeat(15)}\u001b[39m`);
+  });
+
+  it("is identical to plain output once ANSI codes are stripped", () => {
+    // eslint-disable-next-line no-control-regex
+    const strip = (s: string) => s.replace(/\u001b\[\d+m/g, "");
+    expect(strip(formatActivity(a, paint))).toBe(formatActivity(a));
   });
 });

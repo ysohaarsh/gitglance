@@ -135,9 +135,14 @@ export function buildProgram(): Command {
               formatStats(stats, paint),
               formatContributors(top, paint),
               opts.hotspots
-                ? formatChurn(await gatherChurn(process.cwd(), limit, range))
+                ? formatChurn(
+                    await gatherChurn(process.cwd(), limit, range),
+                    paint,
+                  )
                 : "",
-              opts.charts ? formatActivity(computeActivity(commits)) : "",
+              opts.charts
+                ? formatActivity(computeActivity(commits), paint)
+                : "",
             ]
               .filter(Boolean)
               .join("\n\n"),

@@ -80,3 +80,18 @@ describe("gatherChurn", () => {
     await expect(gatherChurn(tmpdir(), 5)).rejects.toThrow();
   });
 });
+
+describe("formatChurn color", () => {
+  it("highlights the hottest file and keeps text intact", async () => {
+    const { createPainter } = await import("../src/color.js");
+    const list = [
+      { path: "a.ts", commits: 5 },
+      { path: "b.ts", commits: 2 },
+    ];
+    const out = formatChurn(list, createPainter(true));
+    expect(out).toContain("\u001b[33m5\u001b[39m");
+    expect(out).toContain("\u001b[32m2\u001b[39m");
+    // eslint-disable-next-line no-control-regex
+    expect(out.replace(/\u001b\[\d+m/g, "")).toBe(formatChurn(list));
+  });
+});
