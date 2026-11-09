@@ -105,6 +105,8 @@ PASS  CI config       .github/workflows
 PASS  Large files     none over 1024 KB
 PASS  Stale branches  none older than 90 days
 FAIL  TODO/FIXME      12 in 5 files: src/health.ts (4), JOURNAL.md (3), README.md (2), +2 more
+WARN  CONTRIBUTING    not found (optional)
+WARN  SECURITY        not found (optional)
 6/7 checks passed
 Score: 80/100
 Points lost:

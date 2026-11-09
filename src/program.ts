@@ -14,6 +14,7 @@ import { computeActivity, formatActivity } from "./activity.js";
 import { formatContributors, formatStats, gatherReport } from "./stats.js";
 import {
   checkBasics,
+  checkOptional,
   checkLargeFiles,
   checkStaleBranches,
   checkTodos,
@@ -196,6 +197,7 @@ export function buildProgram(): Command {
           await checkLargeFiles(cwd, kb),
           await checkStaleBranches(cwd, days),
           await checkTodos(cwd),
+          ...checkOptional(cwd),
         ];
         console.log(formatHealth(checks, createPainter(shouldColor())));
       },

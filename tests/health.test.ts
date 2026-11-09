@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   checkBasics,
+  checkOptional,
   checkLargeFiles,
   checkStaleBranches,
   checkTodos,
@@ -220,5 +221,30 @@ describe("checkTodos", () => {
     const check = await checkTodos(root);
     expect(check.passed).toBe(false);
     expect(check.detail).toBe("3 in 2 files: a.ts (2), b.ts (1)");
+  });
+});
+
+describe("optional checks", () => {
+  it("finds CONTRIBUTING and SECURITY in root, .github or docs", () => {
+    const root = tmp();
+    writeFileSync(join(root, "CONTRIBUTING.md"), "x");
+    mkdirSync(join(root, ".github"), { recursive: true });
+    writeFileSync(join(root, ".github/SECURITY.md"), "x");
+    expect(checkOptional(root).map((c) => c.detail)).toEqual([
+      "CONTRIBUTING.md",
+      ".github/SECURITY.md",
+    ]);
+  });
+
+  it("reports missing files as WARN without affecting the score", () => {
+    const checks = [
+      { name: "README", passed: true, detail: "README.md" },
+      ...checkOptional(tmp()),
+    ];
+    const out = formatHealth(checks);
+    expect(out).toContain("WARN  CONTRIBUTING");
+    expect(out).toContain("1/1 checks passed");
+    expect(out).toContain("Score: 100/100");
+    expect(computeScore(checks).deductions).toEqual([]);
   });
 });

@@ -189,3 +189,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: colored the `stats --charts` weekday/hour bars and the churn hotspots list. `formatActivity` and `formatChurn` take an optional `Painter` (default `plain`); the busiest bar and hottest file are yellow, other bars/counts green, labels dim, headings bold. `stats` passes its existing painter. Tests cover colored output and that stripping ANSI yields the plain output.
 - Decisions: padding is applied before painting so alignment is unaffected; no new Painter methods or dependencies; JSON/CSV output is untouched.
 - Next: `health` optional CONTRIBUTING/SECURITY checks.
+
+## 2026-11-09
+
+- Done: `health` now reports optional CONTRIBUTING and SECURITY files (searched in the root, `.github/` and `docs/`). Missing ones show as `WARN` and are excluded from the score and the pass count via a new `optional` flag on `HealthCheck`. Tests cover discovery and score exclusion; README example updated.
+- Decisions: kept `checkBasics` unchanged and added a separate `checkOptional` so existing callers/tests are stable; no new dependencies.
+- Next: search parent directories for `.gitglancerc.json`.

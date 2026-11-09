@@ -7,6 +7,8 @@ export interface HealthCheck {
   name: string;
   passed: boolean;
   detail: string;
+  /** Optional checks are shown but never count toward the score or pass total. */
+  optional?: boolean;
 }
 
 function hasFile(root: string, pattern: RegExp): string | undefined {
@@ -37,6 +39,29 @@ export function checkBasics(root: string): HealthCheck[] {
     name,
     passed: file !== undefined,
     detail: file ?? "not found",
+  }));
+}
+
+/** Optional community files: CONTRIBUTING and SECURITY (root, .github or docs). */
+export function checkOptional(root: string): HealthCheck[] {
+  const find = (pattern: RegExp): string | undefined => {
+    for (const dir of ["", ".github", "docs"]) {
+      const base = join(root, dir);
+      if (!existsSync(base)) continue;
+      const hit = readdirSync(base).find((f) => pattern.test(f));
+      if (hit) return dir ? `${dir}/${hit}` : hit;
+    }
+    return undefined;
+  };
+  const found: [string, string | undefined][] = [
+    ["CONTRIBUTING", find(/^contributing(\.[a-z]+)?$/i)],
+    ["SECURITY", find(/^security(\.[a-z]+)?$/i)],
+  ];
+  return found.map(([name, file]) => ({
+    name,
+    passed: file !== undefined,
+    detail: file ?? "not found (optional)",
+    optional: true,
   }));
 }
 
@@ -214,6 +239,7 @@ export interface HealthScore {
 /** Weighted 0-100 score: each check is worth a fixed number of points, lost when it fails. */
 export function computeScore(checks: HealthCheck[]): HealthScore {
   const weight = (c: HealthCheck) => CHECK_WEIGHTS[c.name] ?? DEFAULT_WEIGHT;
+  checks = checks.filter((c) => !c.optional);
   const total = checks.reduce((sum, c) => sum + weight(c), 0);
   if (total === 0) return { score: 100, deductions: [] };
   const earned = checks
@@ -234,9 +260,10 @@ export function formatHealth(
   const width = Math.max(...checks.map((c) => c.name.length));
   const rows = checks.map(
     (c) =>
-      `${c.passed ? paint.green("PASS") : paint.red("FAIL")}  ${c.name.padEnd(width)}  ${c.detail}`,
+      `${c.passed ? paint.green("PASS") : c.optional ? paint.yellow("WARN") : paint.red("FAIL")}  ${c.name.padEnd(width)}  ${c.detail}`,
   );
-  const passed = checks.filter((c) => c.passed).length;
+  const scored = checks.filter((c) => !c.optional);
+  const passed = scored.filter((c) => c.passed).length;
   const { score, deductions } = computeScore(checks);
   const scoreText = `Score: ${score}/100`;
   const colored =
@@ -248,7 +275,7 @@ export function formatHealth(
   return [
     paint.bold("Health checks"),
     ...rows,
-    `${passed}/${checks.length} checks passed`,
+    `${passed}/${scored.length} checks passed`,
     colored,
     ...(deductions.length > 0
       ? [paint.bold("Points lost:"), ...deductions.map((d) => paint.red(d))]
