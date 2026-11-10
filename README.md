@@ -71,7 +71,7 @@ npx gitglance stats --format csv > stats.csv
 
 ### Config file
 
-Put a `.gitglancerc.json` in the repository root to set defaults. Command-line flags always win.
+Put a `.gitglancerc.json` in the repository root to set defaults (it is also found when running from a subdirectory; the nearest file up the tree wins). Command-line flags always win.
 
 ```json
 {

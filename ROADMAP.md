@@ -49,4 +49,4 @@ Tasks are done top to bottom, one per day. Edit freely to steer the project.
 - [x] `stats --format csv` output for contributors and hotspots
 - [x] Color the weekday/hour charts and churn hotspots
 - [x] `health`: detect missing CONTRIBUTING/SECURITY files as optional checks
-- [ ] Search parent directories for `.gitglancerc.json`
+- [x] Search parent directories for `.gitglancerc.json`

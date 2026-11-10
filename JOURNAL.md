@@ -195,3 +195,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `health` now reports optional CONTRIBUTING and SECURITY files (searched in the root, `.github/` and `docs/`). Missing ones show as `WARN` and are excluded from the score and the pass count via a new `optional` flag on `HealthCheck`. Tests cover discovery and score exclusion; README example updated.
 - Decisions: kept `checkBasics` unchanged and added a separate `checkOptional` so existing callers/tests are stable; no new dependencies.
 - Next: search parent directories for `.gitglancerc.json`.
+
+## 2026-11-10
+
+- Done: `.gitglancerc.json` is now discovered by walking up from the working directory (new `findConfigFile`; `loadConfig` uses it). The nearest file wins; no merging between levels. Tests cover parent lookup and nearest-wins; README note added.
+- Decisions: search stops at the filesystem root rather than the git root, keeping behavior simple and predictable; no new dependencies.
+- Next: Phase 6 backlog is empty; the next run should add 10 new roadmap tasks.
