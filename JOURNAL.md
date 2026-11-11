@@ -201,3 +201,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `.gitglancerc.json` is now discovered by walking up from the working directory (new `findConfigFile`; `loadConfig` uses it). The nearest file wins; no merging between levels. Tests cover parent lookup and nearest-wins; README note added.
 - Decisions: search stops at the filesystem root rather than the git root, keeping behavior simple and predictable; no new dependencies.
 - Next: Phase 6 backlog is empty; the next run should add 10 new roadmap tasks.
+
+## 2026-11-11
+
+- Done: Phase 6 backlog was empty, so added Phase 7 to ROADMAP.md with 10 new tasks (stats filters/streaks, health secrets check and `--fail-under`, changelog tag shortcuts/links, `summary --dry-run`, `--repo`, shell completion). No code changes.
+- Decisions: tasks ordered by small, self-contained value first.
+- Next: `stats --author`.
