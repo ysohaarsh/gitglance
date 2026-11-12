@@ -1,5 +1,11 @@
 import { plain, type Painter } from "./color.js";
-import { hasCommits, isGitRepo, type LogOptions, runGit } from "./git.js";
+import {
+  authorArgs,
+  hasCommits,
+  isGitRepo,
+  type LogOptions,
+  runGit,
+} from "./git.js";
 
 export interface FileChurn {
   path: string;
@@ -46,7 +52,7 @@ export function formatChurn(list: FileChurn[], paint: Painter = plain): string {
 export async function gatherChurn(
   cwd: string,
   limit: number,
-  range: Pick<LogOptions, "since" | "until"> = {},
+  range: Pick<LogOptions, "since" | "until" | "author"> = {},
 ): Promise<FileChurn[]> {
   if (!(await isGitRepo(cwd))) {
     throw new Error(`${cwd} is not a git repository`);
@@ -62,6 +68,7 @@ export async function gatherChurn(
   ];
   if (range.since) args.push(`--since=${range.since}`);
   if (range.until) args.push(`--until=${range.until}`);
+  if (range.author) args.push(...authorArgs(range.author));
   args.push("HEAD");
   const raw = await runGit(cwd, args);
   return topChurn(parseChurn(raw), limit);

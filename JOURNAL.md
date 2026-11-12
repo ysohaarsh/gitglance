@@ -207,3 +207,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: Phase 6 backlog was empty, so added Phase 7 to ROADMAP.md with 10 new tasks (stats filters/streaks, health secrets check and `--fail-under`, changelog tag shortcuts/links, `summary --dry-run`, `--repo`, shell completion). No code changes.
 - Decisions: tasks ordered by small, self-contained value first.
 - Next: `stats --author`.
+
+## 2026-11-12
+
+- Done: `stats --author <text>`. `LogOptions` gained `author`; a shared `authorArgs` helper in `src/git.ts` emits `--fixed-strings --regexp-ignore-case --author=...`, used by both `getCommits` and the churn log so contributors, charts, hotspots, JSON and CSV all respect it. Tests cover name/email matching, case-insensitivity and hotspots; README documents it.
+- Decisions: substring match on name or email (not regex) for predictability; no new dependencies; not added to the config file.
+- Next: `stats` commit streaks.

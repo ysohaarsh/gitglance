@@ -166,6 +166,38 @@ describe("gatherStats", () => {
     expect(churn).toEqual([{ path: "f.txt", commits: 1 }]);
   });
 
+  it("filters commits by --author (name or email, case-insensitive)", async () => {
+    const cwd = join(base, "authors");
+    mkdirSync(cwd);
+    const run = (who: string, ...args: string[]) =>
+      execFileSync("git", args, {
+        cwd,
+        env: {
+          ...process.env,
+          GIT_AUTHOR_NAME: who,
+          GIT_AUTHOR_EMAIL: `${who.toLowerCase()}@example.com`,
+          GIT_COMMITTER_NAME: who,
+          GIT_COMMITTER_EMAIL: `${who.toLowerCase()}@example.com`,
+        },
+      });
+    run("Ada", "init", "-q", "-b", "main");
+    run("Ada", "config", "commit.gpgsign", "false");
+    for (const [i, who] of ["Ada", "Bob", "Bob"].entries()) {
+      writeFileSync(join(cwd, `f${i}.txt`), "x");
+      run(who, "add", ".");
+      run(who, "commit", "-q", "-m", `c${i}`);
+    }
+    const bob = await gatherReport(cwd, 5, { author: "BOB" });
+    expect(bob.stats.totalCommits).toBe(2);
+    expect(bob.top).toEqual([
+      { name: "Bob", email: "bob@example.com", commits: 2 },
+    ]);
+    const byEmail = await gatherReport(cwd, 5, { author: "ada@example" });
+    expect(byEmail.stats.totalCommits).toBe(1);
+    const churn = await gatherChurn(cwd, 5, { author: "bob" });
+    expect(churn.map((f) => f.path).sort()).toEqual(["f1.txt", "f2.txt"]);
+  });
+
   it("rejects non-repositories", async () => {
     await expect(gatherStats(join(base, "plain"))).rejects.toThrow(
       "not a git repository",

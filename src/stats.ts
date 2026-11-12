@@ -87,7 +87,7 @@ export async function gatherStats(cwd: string): Promise<RepoStats> {
 }
 
 /** Optional date bounds, in any format `git log --since/--until` accepts. */
-export type DateRange = Pick<LogOptions, "since" | "until">;
+export type DateRange = Pick<LogOptions, "since" | "until" | "author">;
 
 /** Stats plus the top `limit` contributors for the repository at `cwd`. */
 export async function gatherReport(

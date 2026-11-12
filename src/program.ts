@@ -77,6 +77,7 @@ export function buildProgram(): Command {
     .option("--hotspots", "show the most-changed files")
     .option("--since <date>", "only count commits after this date")
     .option("--until <date>", "only count commits before this date")
+    .option("--author <text>", "only count commits by this name or email")
     .option("--json", "print all stats as JSON")
     .option(
       "--format <format>",
@@ -93,6 +94,7 @@ export function buildProgram(): Command {
           format: string;
           since?: string;
           until?: string;
+          author?: string;
         },
         cmd: Command,
       ) => {
@@ -108,7 +110,11 @@ export function buildProgram(): Command {
             throw new Error("--format must be one of: text, json, csv");
           }
           const format = opts.json ? "json" : opts.format;
-          const range = { since: opts.since, until: opts.until };
+          const range = {
+            since: opts.since,
+            until: opts.until,
+            author: opts.author,
+          };
           const { stats, top, commits } = await gatherReport(
             process.cwd(),
             limit,

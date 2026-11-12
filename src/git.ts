@@ -30,6 +30,8 @@ export interface Commit {
 export interface LogOptions {
   since?: string;
   until?: string;
+  /** Only commits whose author name or email contains this text (case-insensitive). */
+  author?: string;
   /** Revision or range, e.g. "v1.0.0..HEAD". Defaults to HEAD. */
   range?: string;
   maxCount?: number;
@@ -96,6 +98,11 @@ export function parseLog(raw: string): Commit[] {
     });
 }
 
+/** `git log` flags selecting commits by author name or email substring. */
+export function authorArgs(author: string): string[] {
+  return ["--fixed-strings", "--regexp-ignore-case", `--author=${author}`];
+}
+
 /** Commits newest first. Returns [] for a repository with no commits. */
 export async function getCommits(
   cwd: string,
@@ -106,6 +113,7 @@ export async function getCommits(
   const args = ["log", `--format=${format}${RECORD_SEP}`];
   if (options.since) args.push(`--since=${options.since}`);
   if (options.until) args.push(`--until=${options.until}`);
+  if (options.author) args.push(...authorArgs(options.author));
   if (options.maxCount !== undefined)
     args.push(`--max-count=${options.maxCount}`);
   args.push(options.range ?? "HEAD");

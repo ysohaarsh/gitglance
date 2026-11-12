@@ -36,6 +36,8 @@ Use `--since <date>` and/or `--until <date>` to restrict every section to a time
 npx gitglance stats --since 2026-01-01 --until 2026-02-01
 ```
 
+Use `--author <text>` to restrict every section to commits whose author name or email contains the text (case-insensitive), e.g. `npx gitglance stats --author ada`. It combines with `--since`/`--until`.
+
 Add `--charts` to print ASCII bar charts of commits per weekday and per hour (author-local time):
 
 ```
