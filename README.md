@@ -47,6 +47,13 @@ Commits by weekday:
   ...
 ```
 
+Add `--streaks` to show the longest and current daily commit streaks (author-local dates; the current streak counts only if the last commit day is today or yesterday). The JSON output always includes a `streaks` object.
+
+```
+Longest streak: 12 days
+Current streak: 3 days
+```
+
 Add `--hotspots` to list the most-changed files (commits touching each file, honoring `--limit`):
 
 ```

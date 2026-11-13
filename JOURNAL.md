@@ -213,3 +213,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `stats --author <text>`. `LogOptions` gained `author`; a shared `authorArgs` helper in `src/git.ts` emits `--fixed-strings --regexp-ignore-case --author=...`, used by both `getCommits` and the churn log so contributors, charts, hotspots, JSON and CSV all respect it. Tests cover name/email matching, case-insensitivity and hotspots; README documents it.
 - Decisions: substring match on name or email (not regex) for predictability; no new dependencies; not added to the config file.
 - Next: `stats` commit streaks.
+
+## 2026-11-13
+
+- Done: `stats --streaks` shows the longest and current daily commit streaks. New `src/streaks.ts` (`computeStreaks` with injectable `today`, `formatStreaks`); JSON report now always includes `streaks`. Tests cover runs, same-day dedupe, current-streak rules and empty input; README documents it.
+- Decisions: days use the author-local date from the ISO timestamp (consistent with `--charts`); the current streak is kept alive if the last commit was yesterday; "today" is the UTC day; no new dependencies.
+- Next: `stats` average commits per week and busiest day.

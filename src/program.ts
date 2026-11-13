@@ -10,6 +10,7 @@ import {
 } from "./changelog.js";
 import { formatChurn, gatherChurn } from "./churn.js";
 import { formatCsv } from "./csv.js";
+import { computeStreaks, formatStreaks } from "./streaks.js";
 import { computeActivity, formatActivity } from "./activity.js";
 import { formatContributors, formatStats, gatherReport } from "./stats.js";
 import {
@@ -75,6 +76,7 @@ export function buildProgram(): Command {
     ?.option("-l, --limit <n>", "number of top contributors to show", "5")
     .option("--charts", "show commits per weekday and per hour")
     .option("--hotspots", "show the most-changed files")
+    .option("--streaks", "show longest and current daily commit streaks")
     .option("--since <date>", "only count commits after this date")
     .option("--until <date>", "only count commits before this date")
     .option("--author <text>", "only count commits by this name or email")
@@ -90,6 +92,7 @@ export function buildProgram(): Command {
           limit: string;
           charts?: boolean;
           hotspots?: boolean;
+          streaks?: boolean;
           json?: boolean;
           format: string;
           since?: string;
@@ -141,6 +144,7 @@ export function buildProgram(): Command {
             [
               formatStats(stats, paint),
               formatContributors(top, paint),
+              opts.streaks ? formatStreaks(computeStreaks(commits), paint) : "",
               opts.hotspots
                 ? formatChurn(
                     await gatherChurn(process.cwd(), limit, range),

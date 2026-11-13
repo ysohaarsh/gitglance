@@ -54,7 +54,7 @@ Tasks are done top to bottom, one per day. Edit freely to steer the project.
 ## Phase 7: next ideas
 
 - [x] `stats --author <name|email>`: restrict all stats to one contributor
-- [ ] `stats`: commit streaks (longest and current daily streak)
+- [x] `stats`: commit streaks (longest and current daily streak)
 - [ ] `stats`: average commits per week and busiest day ever
 - [ ] `health`: detect committed secrets-like files (.env, *.pem, id_rsa) as a failing check
 - [ ] `health --fail-under <score>`: exit non-zero when the score is below a threshold (CI use)
