@@ -54,6 +54,13 @@ Longest streak: 12 days
 Current streak: 3 days
 ```
 
+Add `--pace` to show the average commits per week (over the span from the first to the last commit, at least one week) and the busiest day ever. The JSON output always includes a `pace` object.
+
+```
+Commits per week: 14.2
+Busiest day: 2026-03-04 (23 commits)
+```
+
 Add `--hotspots` to list the most-changed files (commits touching each file, honoring `--limit`):
 
 ```

@@ -219,3 +219,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `stats --streaks` shows the longest and current daily commit streaks. New `src/streaks.ts` (`computeStreaks` with injectable `today`, `formatStreaks`); JSON report now always includes `streaks`. Tests cover runs, same-day dedupe, current-streak rules and empty input; README documents it.
 - Decisions: days use the author-local date from the ISO timestamp (consistent with `--charts`); the current streak is kept alive if the last commit was yesterday; "today" is the UTC day; no new dependencies.
 - Next: `stats` average commits per week and busiest day.
+
+## 2026-11-14
+
+- Done: `stats --pace` shows average commits per week and the busiest day ever. New `src/pace.ts` (`computePace`, `formatPace`); JSON report now always includes `pace`. Tests cover span averaging, the one-week minimum, ties/empty input and formatting; README documents it.
+- Decisions: weeks = first-to-last commit day span / 7, minimum one week, rounded to one decimal; days use author-local dates (consistent with streaks/charts); ties go to the earliest day; no new dependencies.
+- Next: `health` detection of committed secrets-like files.

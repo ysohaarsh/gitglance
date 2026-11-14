@@ -1,5 +1,6 @@
 import { computeActivity, type Activity } from "./activity.js";
 import type { FileChurn } from "./churn.js";
+import { computePace, type Pace } from "./pace.js";
 import { computeStreaks, type Streaks } from "./streaks.js";
 import type { Commit } from "./git.js";
 import type { Contributor, RepoStats } from "./stats.js";
@@ -10,6 +11,7 @@ export interface JsonReport {
   hotspots: FileChurn[];
   activity: Activity;
   streaks: Streaks;
+  pace: Pace;
 }
 
 /** Combine all stats sections into one machine-readable report. */
@@ -25,5 +27,6 @@ export function buildJsonReport(
     hotspots,
     activity: computeActivity(commits),
     streaks: computeStreaks(commits),
+    pace: computePace(commits),
   };
 }
