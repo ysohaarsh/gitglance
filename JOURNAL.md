@@ -225,3 +225,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `stats --pace` shows average commits per week and the busiest day ever. New `src/pace.ts` (`computePace`, `formatPace`); JSON report now always includes `pace`. Tests cover span averaging, the one-week minimum, ties/empty input and formatting; README documents it.
 - Decisions: weeks = first-to-last commit day span / 7, minimum one week, rounded to one decimal; days use author-local dates (consistent with streaks/charts); ties go to the earliest day; no new dependencies.
 - Next: `health` detection of committed secrets-like files.
+
+## 2026-11-15
+
+- Done: `health` now has a scored "Secrets" check that fails when tracked files look like secrets (`.env`, `.env.*`, `*.pem`, `*.key`, `*.p12`, `*.pfx`, `id_rsa`/`id_ed25519` etc.). New `findSecretFiles` and `checkSecrets` in `src/health.ts`, wired into the health command. Tests cover matching and a fixture repo; README example updated.
+- Decisions: matches on file name only (never reads contents); `.example`/`.sample`/`.template`/`.dist` variants and `.pub` keys are ignored; weight 20 in the score; no new dependencies.
+- Next: `health --fail-under <score>`.

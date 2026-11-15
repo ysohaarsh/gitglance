@@ -56,7 +56,7 @@ Tasks are done top to bottom, one per day. Edit freely to steer the project.
 - [x] `stats --author <name|email>`: restrict all stats to one contributor
 - [x] `stats`: commit streaks (longest and current daily streak)
 - [x] `stats`: average commits per week and busiest day ever
-- [ ] `health`: detect committed secrets-like files (.env, *.pem, id_rsa) as a failing check
+- [x] `health`: detect committed secrets-like files (.env, *.pem, id_rsa) as a failing check
 - [ ] `health --fail-under <score>`: exit non-zero when the score is below a threshold (CI use)
 - [ ] `changelog --from-tag/--to-tag` shortcuts with a friendly error for unknown tags
 - [ ] `changelog`: link commit hashes and compare URLs when an `origin` GitHub remote exists

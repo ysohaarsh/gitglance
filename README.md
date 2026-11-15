@@ -5,7 +5,7 @@
 `gitglance` is a TypeScript CLI that analyzes a git repository and tells you what's going on:
 
 - **Activity stats**: commits over time, top contributors, busiest files, churn hotspots
-- **Health checks**: missing README/LICENSE/CI, stale branches, large files, TODO density
+- **Health checks**: missing README/LICENSE/CI, stale branches, large files, TODO density, committed secrets-like files (.env, *.pem, id_rsa)
 - **Changelog generation**: from Conventional Commits, grouped by type and version tag
 - **AI summary** (optional): a plain-English summary of recent work via the Claude API
 
@@ -121,12 +121,13 @@ PASS  CI config       .github/workflows
 PASS  Large files     none over 1024 KB
 PASS  Stale branches  none older than 90 days
 FAIL  TODO/FIXME      12 in 5 files: src/health.ts (4), JOURNAL.md (3), README.md (2), +2 more
+PASS  Secrets         no secrets-like files tracked
 WARN  CONTRIBUTING    not found (optional)
 WARN  SECURITY        not found (optional)
-6/7 checks passed
-Score: 80/100
+7/8 checks passed
+Score: 83/100
 Points lost:
--20  TODO/FIXME: 12 in 5 files: src/health.ts (4), JOURNAL.md (3), README.md (2), +2 more
+-17  TODO/FIXME: 12 in 5 files: src/health.ts (4), JOURNAL.md (3), README.md (2), +2 more
 ```
 
 ```bash

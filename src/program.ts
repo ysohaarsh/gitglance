@@ -19,6 +19,7 @@ import {
   checkOptional,
   checkLargeFiles,
   checkStaleBranches,
+  checkSecrets,
   checkTodos,
   formatHealth,
 } from "./health.js";
@@ -211,6 +212,7 @@ export function buildProgram(): Command {
           await checkLargeFiles(cwd, kb),
           await checkStaleBranches(cwd, days),
           await checkTodos(cwd),
+          await checkSecrets(cwd),
           ...checkOptional(cwd),
         ];
         console.log(formatHealth(checks, createPainter(shouldColor())));

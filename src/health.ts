@@ -219,6 +219,41 @@ export async function checkTodos(cwd: string): Promise<HealthCheck> {
   };
 }
 
+const SECRET_EXAMPLE = /\.(example|sample|template|dist)$/i;
+const SECRET_NAME =
+  /^(\.env(\..+)?|id_(rsa|dsa|ecdsa|ed25519)|.+\.(pem|key|p12|pfx|jks|keystore))$/i;
+
+/** Pick out paths whose file name looks like a committed secret (env files, private keys). */
+export function findSecretFiles(paths: string[]): string[] {
+  return paths
+    .filter((path) => {
+      const base = path.slice(path.lastIndexOf("/") + 1);
+      return SECRET_NAME.test(base) && !SECRET_EXAMPLE.test(base);
+    })
+    .sort();
+}
+
+/** Fail when tracked files look like secrets: .env, *.pem, *.key, id_rsa and friends. */
+export async function checkSecrets(cwd: string): Promise<HealthCheck> {
+  const name = "Secrets";
+  let out: string;
+  try {
+    out = await runGit(cwd, ["ls-files"]);
+  } catch {
+    return { name, passed: true, detail: "skipped (no files to inspect)" };
+  }
+  const hits = findSecretFiles(out.split("\n").filter(Boolean));
+  if (hits.length === 0) {
+    return { name, passed: true, detail: "no secrets-like files tracked" };
+  }
+  const more = hits.length > 3 ? `, +${hits.length - 3} more` : "";
+  return {
+    name,
+    passed: false,
+    detail: `${hits.length} tracked: ${hits.slice(0, 3).join(", ")}${more}`,
+  };
+}
+
 const CHECK_WEIGHTS: Record<string, number> = {
   README: 15,
   LICENSE: 10,
@@ -227,6 +262,7 @@ const CHECK_WEIGHTS: Record<string, number> = {
   "Large files": 15,
   "Stale branches": 10,
   "TODO/FIXME": 20,
+  Secrets: 20,
 };
 const DEFAULT_WEIGHT = 10;
 

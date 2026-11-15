@@ -6,6 +6,8 @@ import { describe, expect, it } from "vitest";
 import {
   checkBasics,
   checkOptional,
+  checkSecrets,
+  findSecretFiles,
   checkLargeFiles,
   checkStaleBranches,
   checkTodos,
@@ -246,5 +248,51 @@ describe("optional checks", () => {
     expect(out).toContain("1/1 checks passed");
     expect(out).toContain("Score: 100/100");
     expect(computeScore(checks).deductions).toEqual([]);
+  });
+});
+
+describe("findSecretFiles", () => {
+  it("flags env files, keys and certs but not examples", () => {
+    expect(
+      findSecretFiles([
+        "src/a.ts",
+        ".env",
+        "config/.env.production",
+        ".env.example",
+        "certs/server.pem",
+        "deploy/id_rsa",
+        "id_rsa.pub",
+        "keys/app.KEY",
+        "tls.key.sample",
+      ]),
+    ).toEqual([
+      ".env",
+      "certs/server.pem",
+      "config/.env.production",
+      "deploy/id_rsa",
+      "keys/app.KEY",
+    ]);
+  });
+});
+
+describe("checkSecrets", () => {
+  function repo(files: string[]): string {
+    const root = tmp();
+    const git = (...a: string[]) => execFileSync("git", a, { cwd: root });
+    git("init", "-q");
+    for (const name of files) writeFileSync(join(root, name), "x\n");
+    git("add", ".");
+    return root;
+  }
+
+  it("passes on a clean repo", async () => {
+    const check = await checkSecrets(repo(["a.ts"]));
+    expect(check).toMatchObject({ name: "Secrets", passed: true });
+  });
+
+  it("fails when a secrets-like file is tracked", async () => {
+    const check = await checkSecrets(repo(["a.ts", ".env", "x.pem"]));
+    expect(check.passed).toBe(false);
+    expect(check.detail).toBe("2 tracked: .env, x.pem");
   });
 });
