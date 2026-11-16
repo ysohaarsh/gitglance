@@ -296,3 +296,19 @@ describe("checkSecrets", () => {
     expect(check.detail).toBe("2 tracked: .env, x.pem");
   });
 });
+
+describe("parseFailUnder", () => {
+  it("accepts numbers between 0 and 100", async () => {
+    const { parseFailUnder } = await import("../src/health.js");
+    expect(parseFailUnder("0")).toBe(0);
+    expect(parseFailUnder("80")).toBe(80);
+    expect(parseFailUnder("99.5")).toBe(99.5);
+  });
+
+  it("rejects invalid values", async () => {
+    const { parseFailUnder } = await import("../src/health.js");
+    for (const bad of ["", "abc", "-1", "101"]) {
+      expect(() => parseFailUnder(bad)).toThrow(/between 0 and 100/);
+    }
+  });
+});

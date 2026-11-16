@@ -21,7 +21,9 @@ import {
   checkStaleBranches,
   checkSecrets,
   checkTodos,
+  computeScore,
   formatHealth,
+  parseFailUnder,
 } from "./health.js";
 import { createPainter, shouldColor } from "./color.js";
 import { summarize } from "./summary.js";
@@ -182,11 +184,19 @@ export function buildProgram(): Command {
       "flag branches with no commits in this many days",
       "90",
     )
+    .option(
+      "--fail-under <score>",
+      "exit with code 1 when the health score is below this (0-100)",
+    )
     .action(
       async (
-        opts: { maxFileSize: string; staleDays: string },
+        opts: { maxFileSize: string; staleDays: string; failUnder?: string },
         cmd: Command,
       ) => {
+        const failUnder =
+          opts.failUnder === undefined
+            ? undefined
+            : parseFailUnder(opts.failUnder);
         const config = loadConfig(process.cwd());
         const kb = fromConfig(
           cmd,
@@ -216,6 +226,13 @@ export function buildProgram(): Command {
           ...checkOptional(cwd),
         ];
         console.log(formatHealth(checks, createPainter(shouldColor())));
+        if (failUnder !== undefined) {
+          const { score } = computeScore(checks);
+          if (score < failUnder) {
+            console.error(`Health score ${score} is below ${failUnder}`);
+            process.exitCode = 1;
+          }
+        }
       },
     );
 

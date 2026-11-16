@@ -289,6 +289,15 @@ export function computeScore(checks: HealthCheck[]): HealthScore {
   return { score: Math.round((earned / total) * 100), deductions };
 }
 
+/** Parse a `--fail-under` value: a number from 0 to 100. */
+export function parseFailUnder(value: string): number {
+  const n = Number(value);
+  if (value.trim() === "" || !Number.isFinite(n) || n < 0 || n > 100) {
+    throw new Error("--fail-under must be a number between 0 and 100");
+  }
+  return n;
+}
+
 export function formatHealth(
   checks: HealthCheck[],
   paint: Painter = plain,

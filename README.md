@@ -133,6 +133,7 @@ Points lost:
 ```bash
 npx gitglance health --max-file-size 500   # flag tracked files >= 500 KB (default 1024)
 npx gitglance health --stale-days 30       # flag local branches idle for >= 30 days (default 90)
+npx gitglance health --fail-under 80       # exit 1 if the score is below 80 (for CI)
 ```
 
 ### `changelog`

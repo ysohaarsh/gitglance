@@ -231,3 +231,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `health` now has a scored "Secrets" check that fails when tracked files look like secrets (`.env`, `.env.*`, `*.pem`, `*.key`, `*.p12`, `*.pfx`, `id_rsa`/`id_ed25519` etc.). New `findSecretFiles` and `checkSecrets` in `src/health.ts`, wired into the health command. Tests cover matching and a fixture repo; README example updated.
 - Decisions: matches on file name only (never reads contents); `.example`/`.sample`/`.template`/`.dist` variants and `.pub` keys are ignored; weight 20 in the score; no new dependencies.
 - Next: `health --fail-under <score>`.
+
+## 2026-11-16
+
+- Done: `health --fail-under <score>` sets exit code 1 (and prints a message to stderr) when the score is below the threshold, for CI use. New `parseFailUnder` validates a number in 0-100; the normal report is still printed. Tests cover valid/invalid values; README documents it.
+- Decisions: exit code set via `process.exitCode` so output flushes; invalid values fail before any checks run; not added to the config file; no new dependencies.
+- Next: `changelog --from-tag/--to-tag` shortcuts.
