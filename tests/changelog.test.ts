@@ -10,6 +10,7 @@ import {
   gatherChangelogByTag,
   groupCommits,
   prependChangelog,
+  resolveTag,
 } from "../src/changelog.js";
 import type { Commit } from "../src/git.js";
 
@@ -227,5 +228,30 @@ describe("prependChangelog", () => {
     expect(out).toContain("new");
     expect(out).not.toContain("old");
     expect(out.match(/## Unreleased/g)).toHaveLength(1);
+  });
+});
+
+describe("resolveTag", () => {
+  it("returns an existing tag", async () => {
+    const { cwd, add, run } = makeRepo();
+    add("a", "feat: one");
+    run("tag", "v1.0.0");
+    expect(await resolveTag(cwd, "v1.0.0")).toBe("v1.0.0");
+  });
+
+  it("lists available tags for an unknown tag", async () => {
+    const { cwd, add, run } = makeRepo();
+    add("a", "feat: one");
+    run("tag", "v1.0.0");
+    run("tag", "v1.1.0");
+    await expect(resolveTag(cwd, "v9")).rejects.toThrow(
+      'Unknown tag "v9". Available tags: v1.1.0, v1.0.0',
+    );
+  });
+
+  it("says so when there are no tags", async () => {
+    const { cwd, add } = makeRepo();
+    add("a", "feat: one");
+    await expect(resolveTag(cwd, "v1")).rejects.toThrow("no tags");
   });
 });

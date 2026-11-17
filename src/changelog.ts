@@ -95,6 +95,24 @@ export async function gatherChangelog(
   return groupCommits(await getCommits(cwd, { range }));
 }
 
+/**
+ * Check that `tag` exists, returning it unchanged. Throws a friendly error
+ * listing the available tags otherwise.
+ */
+export async function resolveTag(cwd: string, tag: string): Promise<string> {
+  const out = await runGit(cwd, ["tag", "--list", "--sort=-v:refname"]);
+  const tags = out
+    .split("\n")
+    .map((t) => t.trim())
+    .filter((t) => t !== "");
+  if (tags.includes(tag)) return tag;
+  const available =
+    tags.length > 0
+      ? `Available tags: ${tags.slice(0, 10).join(", ")}${tags.length > 10 ? ", ..." : ""}`
+      : "This repository has no tags.";
+  throw new Error(`Unknown tag "${tag}". ${available}`);
+}
+
 export interface ChangelogSection {
   heading: string;
   groups: ChangelogGroup[];

@@ -7,6 +7,7 @@ import {
   gatherChangelog,
   gatherChangelogByTag,
   prependChangelog,
+  resolveTag,
 } from "./changelog.js";
 import { formatChurn, gatherChurn } from "./churn.js";
 import { formatCsv } from "./csv.js";
@@ -240,16 +241,37 @@ export function buildProgram(): Command {
     .find((c) => c.name() === "changelog")
     ?.option("--from <ref>", "start after this ref (exclusive)")
     .option("--to <ref>", "end at this ref (inclusive)", "HEAD")
+    .option(
+      "--from-tag <tag>",
+      "like --from, but the ref must be an existing tag",
+    )
+    .option("--to-tag <tag>", "like --to, but the ref must be an existing tag")
     .option("--by-tag", "split into one section per version tag")
     .option("--write", "prepend the result to CHANGELOG.md (implies --by-tag)")
     .action(
       async (opts: {
         from?: string;
         to: string;
+        fromTag?: string;
+        toTag?: string;
         byTag?: boolean;
         write?: boolean;
       }) => {
         try {
+          if (opts.fromTag || opts.toTag) {
+            if (opts.fromTag && opts.from) {
+              throw new Error("--from-tag cannot be combined with --from");
+            }
+            if (opts.toTag && opts.to !== "HEAD") {
+              throw new Error("--to-tag cannot be combined with --to");
+            }
+            if (opts.fromTag) {
+              opts.from = await resolveTag(process.cwd(), opts.fromTag);
+            }
+            if (opts.toTag) {
+              opts.to = await resolveTag(process.cwd(), opts.toTag);
+            }
+          }
           if (opts.write) {
             if (opts.from || opts.to !== "HEAD") {
               throw new Error("--write cannot be combined with --from/--to");

@@ -148,6 +148,7 @@ npx gitglance health --fail-under 80       # exit 1 if the score is below 80 (fo
 
 ```bash
 npx gitglance changelog --from v1.0.0 --to HEAD   # Markdown changelog grouped by commit type
+npx gitglance changelog --from-tag v1.0.0 --to-tag v1.1.0   # same, but unknown tags give a friendly error
 npx gitglance changelog --by-tag   # one section per version tag (plus Unreleased)
 npx gitglance changelog --write    # prepend new sections to CHANGELOG.md (Unreleased is refreshed)
 ```

@@ -237,3 +237,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `health --fail-under <score>` sets exit code 1 (and prints a message to stderr) when the score is below the threshold, for CI use. New `parseFailUnder` validates a number in 0-100; the normal report is still printed. Tests cover valid/invalid values; README documents it.
 - Decisions: exit code set via `process.exitCode` so output flushes; invalid values fail before any checks run; not added to the config file; no new dependencies.
 - Next: `changelog --from-tag/--to-tag` shortcuts.
+
+## 2026-11-17
+
+- Done: `changelog --from-tag <tag>` / `--to-tag <tag>`. New `resolveTag` in `src/changelog.ts` verifies the tag exists and otherwise throws `Unknown tag "x". Available tags: ...` (newest 10 listed, or a "no tags" message). Combining with `--from`/`--to` is rejected. Tests cover existing, unknown and no-tag cases; README documents it.
+- Decisions: exact tag-name match via `git tag --list`; reuses the existing range logic; no new dependencies.
+- Next: `changelog` commit hash and compare links for GitHub remotes.
