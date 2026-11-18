@@ -8,6 +8,7 @@ import {
   gatherChangelogByTag,
   prependChangelog,
   resolveTag,
+  originRepoUrl,
 } from "./changelog.js";
 import { formatChurn, gatherChurn } from "./churn.js";
 import { formatCsv } from "./csv.js";
@@ -297,7 +298,14 @@ export function buildProgram(): Command {
             opts.to,
           );
           const heading = opts.to === "HEAD" ? "Unreleased" : opts.to;
-          console.log(formatChangelog(groups, heading));
+          const repoUrl = await originRepoUrl(process.cwd());
+          const links = repoUrl
+            ? {
+                repoUrl,
+                compare: opts.from ? `${opts.from}...${opts.to}` : undefined,
+              }
+            : undefined;
+          console.log(formatChangelog(groups, heading, links));
         } catch (err) {
           console.error(err instanceof Error ? err.message : String(err));
           process.exitCode = 1;

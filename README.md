@@ -143,8 +143,10 @@ npx gitglance health --fail-under 80       # exit 1 if the score is below 80 (fo
 
 ### Features
 
-- support .gitglancerc.json defaults for stats, health and summary (764181d)
+- support .gitglancerc.json defaults for stats, health and summary ([764181d](https://github.com/ysohaarsh/gitglance/commit/764181d))
 ```
+
+When `origin` is a GitHub remote, commit hashes link to the commit and ranges/sections get a "Full diff" compare link. Other remotes produce plain hashes.
 
 ```bash
 npx gitglance changelog --from v1.0.0 --to HEAD   # Markdown changelog grouped by commit type

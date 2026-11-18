@@ -8,6 +8,7 @@ import {
   formatChangelogSections,
   gatherChangelog,
   gatherChangelogByTag,
+  githubRepoUrl,
   groupCommits,
   prependChangelog,
   resolveTag,
@@ -87,6 +88,20 @@ describe("formatChangelog", () => {
         "",
         "- **BREAKING** crash (abcdefg)",
       ].join("\n"),
+    );
+  });
+
+  it("links hashes and the compare range when links are given", () => {
+    const out = formatChangelog(
+      groupCommits([commit("1234567890", "feat: add flag")]),
+      "v2",
+      { repoUrl: "https://github.com/o/r", compare: "v1...v2" },
+    );
+    expect(out).toContain(
+      "[Full diff](https://github.com/o/r/compare/v1...v2)",
+    );
+    expect(out).toContain(
+      "- add flag ([1234567](https://github.com/o/r/commit/1234567890))",
     );
   });
 
@@ -253,5 +268,43 @@ describe("resolveTag", () => {
     const { cwd, add } = makeRepo();
     add("a", "feat: one");
     await expect(resolveTag(cwd, "v1")).rejects.toThrow("no tags");
+  });
+});
+
+describe("githubRepoUrl", () => {
+  it.each([
+    "https://github.com/o/r",
+    "https://github.com/o/r.git",
+    "https://user@github.com/o/r.git",
+    "git@github.com:o/r.git",
+    "ssh://git@github.com/o/r.git",
+  ])("parses %s", (remote) => {
+    expect(githubRepoUrl(remote)).toBe("https://github.com/o/r");
+  });
+
+  it("rejects non-GitHub remotes", () => {
+    expect(githubRepoUrl("https://gitlab.com/o/r.git")).toBeNull();
+    expect(githubRepoUrl("/some/local/path")).toBeNull();
+  });
+});
+
+describe("gatherChangelogByTag links", () => {
+  it("adds compare links when origin is a GitHub remote", async () => {
+    const { cwd, add, run } = makeRepo();
+    run("remote", "add", "origin", "git@github.com:o/r.git");
+    add("a", "feat: one");
+    run("tag", "v1.0.0");
+    add("b", "fix: two");
+    run("tag", "v1.1.0");
+    const out = formatChangelogSections(await gatherChangelogByTag(cwd));
+    expect(out).toContain("https://github.com/o/r/compare/v1.0.0...v1.1.0");
+    expect(out).toContain("https://github.com/o/r/commit/");
+  });
+
+  it("stays plain without a GitHub origin", async () => {
+    const { cwd, add } = makeRepo();
+    add("a", "feat: one");
+    const out = formatChangelogSections(await gatherChangelogByTag(cwd));
+    expect(out).not.toContain("](");
   });
 });

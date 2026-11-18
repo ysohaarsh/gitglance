@@ -59,7 +59,7 @@ Tasks are done top to bottom, one per day. Edit freely to steer the project.
 - [x] `health`: detect committed secrets-like files (.env, *.pem, id_rsa) as a failing check
 - [x] `health --fail-under <score>`: exit non-zero when the score is below a threshold (CI use)
 - [x] `changelog --from-tag/--to-tag` shortcuts with a friendly error for unknown tags
-- [ ] `changelog`: link commit hashes and compare URLs when an `origin` GitHub remote exists
+- [x] `changelog`: link commit hashes and compare URLs when an `origin` GitHub remote exists
 - [ ] `summary --dry-run`: print the prompt that would be sent without calling the API
 - [ ] Add `gitglance --repo <path>` global option to analyze a repository elsewhere on disk
 - [ ] Shell completion output via `gitglance completion <bash|zsh|fish>`

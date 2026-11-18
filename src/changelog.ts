@@ -62,12 +62,44 @@ export function groupCommits(commits: Commit[]): ChangelogGroup[] {
   return order.flatMap((t) => groups.get(t) ?? []);
 }
 
-/** Render grouped commits as Markdown. */
+export interface ChangelogLinks {
+  /** Web URL of the repository, e.g. https://github.com/owner/repo */
+  repoUrl: string;
+  /** Compare range for the section's "Full diff" link, e.g. `v1.0.0...v1.1.0`. */
+  compare?: string;
+}
+
+/**
+ * Turn a GitHub remote URL (https, ssh or scp-like) into the repository web
+ * URL, or null when the remote is not on github.com.
+ */
+export function githubRepoUrl(remote: string): string | null {
+  const m =
+    /^(?:https?:\/\/(?:[^@/]+@)?|ssh:\/\/git@|git@)github\.com[/:]([\w.-]+)\/([\w.-]+?)(?:\.git)?\/?$/.exec(
+      remote.trim(),
+    );
+  return m ? `https://github.com/${m[1]}/${m[2]}` : null;
+}
+
+/** Web URL of the `origin` remote when it points at GitHub, else null. */
+export async function originRepoUrl(cwd: string): Promise<string | null> {
+  try {
+    return githubRepoUrl(await runGit(cwd, ["remote", "get-url", "origin"]));
+  } catch {
+    return null;
+  }
+}
+
+/** Render grouped commits as Markdown, linking hashes when `links` is given. */
 export function formatChangelog(
   groups: ChangelogGroup[],
   heading: string,
+  links?: ChangelogLinks,
 ): string {
   const lines = [`## ${heading}`];
+  if (links?.compare) {
+    lines.push("", `[Full diff](${links.repoUrl}/compare/${links.compare})`);
+  }
   if (groups.length === 0) {
     lines.push("", "No changes.");
     return lines.join("\n");
@@ -77,9 +109,11 @@ export function formatChangelog(
     for (const e of group.entries) {
       const scope = e.scope ? `**${e.scope}:** ` : "";
       const breaking = e.breaking ? "**BREAKING** " : "";
-      lines.push(
-        `- ${breaking}${scope}${e.description} (${e.hash.slice(0, 7)})`,
-      );
+      const short = e.hash.slice(0, 7);
+      const ref = links
+        ? `[${short}](${links.repoUrl}/commit/${e.hash})`
+        : short;
+      lines.push(`- ${breaking}${scope}${e.description} (${ref})`);
     }
   }
   return lines.join("\n");
@@ -116,6 +150,7 @@ export async function resolveTag(cwd: string, tag: string): Promise<string> {
 export interface ChangelogSection {
   heading: string;
   groups: ChangelogGroup[];
+  links?: ChangelogLinks;
 }
 
 /** Version-like tags (optional leading "v"), newest version first. */
@@ -142,15 +177,25 @@ export async function gatherChangelogByTag(
   cwd: string,
 ): Promise<ChangelogSection[]> {
   const tags = await listVersionTags(cwd);
+  const repoUrl = await originRepoUrl(cwd);
+  const links = (from: string | undefined, to: string) =>
+    repoUrl
+      ? { repoUrl, compare: from ? `${from}...${to}` : undefined }
+      : undefined;
   const sections: ChangelogSection[] = [];
   const unreleased = await gatherChangelog(cwd, tags[0]);
   if (unreleased.length > 0 || tags.length === 0) {
-    sections.push({ heading: "Unreleased", groups: unreleased });
+    sections.push({
+      heading: "Unreleased",
+      groups: unreleased,
+      links: links(tags[0], "HEAD"),
+    });
   }
   for (const [i, tag] of tags.entries()) {
     sections.push({
       heading: tag,
       groups: await gatherChangelog(cwd, tags[i + 1], tag),
+      links: links(tags[i + 1], tag),
     });
   }
   return sections;
@@ -158,7 +203,9 @@ export async function gatherChangelogByTag(
 
 /** Render several sections as one Markdown document. */
 export function formatChangelogSections(sections: ChangelogSection[]): string {
-  return sections.map((s) => formatChangelog(s.groups, s.heading)).join("\n\n");
+  return sections
+    .map((s) => formatChangelog(s.groups, s.heading, s.links))
+    .join("\n\n");
 }
 
 const CHANGELOG_TITLE = "# Changelog";
@@ -187,6 +234,6 @@ export function prependChangelog(
   const known = new Set(old.map((s) => s.heading));
   const fresh = sections
     .filter((s) => s.heading === "Unreleased" || !known.has(s.heading))
-    .map((s) => formatChangelog(s.groups, s.heading));
+    .map((s) => formatChangelog(s.groups, s.heading, s.links));
   return `${[CHANGELOG_TITLE, ...fresh, ...old.map((s) => s.text)].join("\n\n")}\n`;
 }

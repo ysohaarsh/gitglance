@@ -243,3 +243,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `changelog --from-tag <tag>` / `--to-tag <tag>`. New `resolveTag` in `src/changelog.ts` verifies the tag exists and otherwise throws `Unknown tag "x". Available tags: ...` (newest 10 listed, or a "no tags" message). Combining with `--from`/`--to` is rejected. Tests cover existing, unknown and no-tag cases; README documents it.
 - Decisions: exact tag-name match via `git tag --list`; reuses the existing range logic; no new dependencies.
 - Next: `changelog` commit hash and compare links for GitHub remotes.
+
+## 2026-11-18
+
+- Done: `changelog` links commit hashes and adds a "Full diff" compare link when `origin` is a GitHub remote (https, ssh and scp-style URLs). New `githubRepoUrl` / `originRepoUrl` in `src/changelog.ts`; `formatChangelog` takes optional links, `--by-tag`/`--write` sections carry per-section compare ranges. Tests cover URL parsing, link rendering and a fixture repo with and without a GitHub origin; README documents it.
+- Decisions: links are automatic (no flag); non-GitHub remotes keep plain hashes; compare link omitted when a section has no previous ref; no new dependencies.
+- Next: `summary --dry-run`.
