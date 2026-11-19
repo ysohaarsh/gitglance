@@ -162,6 +162,12 @@ export ANTHROPIC_API_KEY=...
 npx gitglance summary --days 7   # AI summary of the last 7 days of commits
 ```
 
+`--dry-run` prints the exact prompt that would be sent, without needing a key or making any network call:
+
+```bash
+npx gitglance summary --days 7 --dry-run
+```
+
 Without `ANTHROPIC_API_KEY` the command prints a setup hint and exits 0; nothing is sent anywhere.
 
 ## License

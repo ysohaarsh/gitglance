@@ -249,3 +249,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `changelog` links commit hashes and adds a "Full diff" compare link when `origin` is a GitHub remote (https, ssh and scp-style URLs). New `githubRepoUrl` / `originRepoUrl` in `src/changelog.ts`; `formatChangelog` takes optional links, `--by-tag`/`--write` sections carry per-section compare ranges. Tests cover URL parsing, link rendering and a fixture repo with and without a GitHub origin; README documents it.
 - Decisions: links are automatic (no flag); non-GitHub remotes keep plain hashes; compare link omitted when a section has no previous ref; no new dependencies.
 - Next: `summary --dry-run`.
+
+## 2026-11-19
+
+- Done: `summary --dry-run` prints the exact prompt that would be sent to the model and exits without needing `ANTHROPIC_API_KEY` or making any network call. `summarize` takes a `dryRun` flag; test covers no key + no fetch; README documents it.
+- Decisions: dry run takes precedence over the missing-key message; empty range still reports "No commits"; no new dependencies.
+- Next: global `--repo <path>` option.

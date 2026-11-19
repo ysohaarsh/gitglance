@@ -71,6 +71,14 @@ describe("summary", () => {
     expect(f).not.toHaveBeenCalled();
   });
 
+  it("dry run returns the prompt without a key or network call", async () => {
+    const f = okFetch("x");
+    const out = await summarize(repo(), 7, {}, f, true);
+    expect(out).toContain("last 7 day(s)");
+    expect(out).toContain("feat: hello");
+    expect(f).not.toHaveBeenCalled();
+  });
+
   it("summarizes a real repo with a mocked API", async () => {
     const f = okFetch("Summary!");
     const out = await summarize(repo(), 7, { ANTHROPIC_API_KEY: "k" }, f);

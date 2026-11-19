@@ -316,14 +316,23 @@ export function buildProgram(): Command {
   program.commands
     .find((c) => c.name() === "summary")
     ?.option("--days <n>", "summarize commits from the last N days", "7")
-    .action(async (opts: { days: string }, cmd: Command) => {
+    .option("--dry-run", "print the prompt without calling the API")
+    .action(async (opts: { days: string; dryRun?: boolean }, cmd: Command) => {
       try {
         const config = loadConfig(process.cwd());
         const days = fromConfig(cmd, "days", opts.days, config.days);
         if (!Number.isInteger(days) || days <= 0) {
           throw new Error("--days must be a positive integer");
         }
-        console.log(await summarize(process.cwd(), days));
+        console.log(
+          await summarize(
+            process.cwd(),
+            days,
+            process.env,
+            undefined,
+            opts.dryRun === true,
+          ),
+        );
       } catch (err) {
         console.error(err instanceof Error ? err.message : String(err));
         process.exitCode = 1;

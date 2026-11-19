@@ -74,7 +74,13 @@ export async function summarize(
   days: number,
   env: NodeJS.ProcessEnv = process.env,
   fetchFn?: FetchLike,
+  dryRun = false,
 ): Promise<string> {
+  if (dryRun) {
+    const commits = await getCommits(cwd, { since: `${days} days ago` });
+    if (commits.length === 0) return `No commits in the last ${days} day(s).`;
+    return buildPrompt(commits, days);
+  }
   const apiKey = env.ANTHROPIC_API_KEY;
   if (!apiKey) return NO_KEY_MESSAGE;
   const commits = await getCommits(cwd, { since: `${days} days ago` });
