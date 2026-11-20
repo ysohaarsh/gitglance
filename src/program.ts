@@ -1,5 +1,5 @@
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { Command } from "commander";
 import {
   formatChangelog,
@@ -61,12 +61,33 @@ function fromConfig(
   return Number(cliValue);
 }
 
+/** Resolve the `--repo` option to an existing directory (default: cwd). */
+export function resolveRepoPath(repo: string | undefined): string {
+  if (repo === undefined) return process.cwd();
+  const dir = resolve(repo);
+  if (!existsSync(dir) || !statSync(dir).isDirectory()) {
+    throw new Error(`--repo: "${repo}" is not a directory`);
+  }
+  return dir;
+}
+
 export function buildProgram(): Command {
   const program = new Command();
+  let root: string | undefined;
+  const getRoot = (): string => root ?? process.cwd();
   program
     .name("gitglance")
     .description("Understand any git repository at a glance")
-    .version(VERSION, "-v, --version", "print the version");
+    .version(VERSION, "-v, --version", "print the version")
+    .option("-C, --repo <path>", "analyze the repository at this path")
+    .hook("preAction", (thisCommand) => {
+      try {
+        root = resolveRepoPath(thisCommand.opts<{ repo?: string }>().repo);
+      } catch (err) {
+        console.error(err instanceof Error ? err.message : String(err));
+        process.exit(1);
+      }
+    });
 
   for (const { name, description } of SUBCOMMANDS) {
     program
@@ -110,7 +131,7 @@ export function buildProgram(): Command {
         cmd: Command,
       ) => {
         try {
-          const config = loadConfig(process.cwd());
+          const config = loadConfig(getRoot());
           const limit = fromConfig(cmd, "limit", opts.limit, config.limit);
           opts.since ??= config.since;
           opts.until ??= config.until;
@@ -127,17 +148,17 @@ export function buildProgram(): Command {
             author: opts.author,
           };
           const { stats, top, commits } = await gatherReport(
-            process.cwd(),
+            getRoot(),
             limit,
             range,
           );
           if (format === "csv") {
-            const hotspots = await gatherChurn(process.cwd(), limit, range);
+            const hotspots = await gatherChurn(getRoot(), limit, range);
             console.log(formatCsv(top, hotspots));
             return;
           }
           if (format === "json") {
-            const hotspots = await gatherChurn(process.cwd(), limit, range);
+            const hotspots = await gatherChurn(getRoot(), limit, range);
             console.log(
               JSON.stringify(
                 buildJsonReport(stats, top, hotspots, commits),
@@ -155,10 +176,7 @@ export function buildProgram(): Command {
               opts.streaks ? formatStreaks(computeStreaks(commits), paint) : "",
               opts.pace ? formatPace(computePace(commits), paint) : "",
               opts.hotspots
-                ? formatChurn(
-                    await gatherChurn(process.cwd(), limit, range),
-                    paint,
-                  )
+                ? formatChurn(await gatherChurn(getRoot(), limit, range), paint)
                 : "",
               opts.charts
                 ? formatActivity(computeActivity(commits), paint)
@@ -199,7 +217,7 @@ export function buildProgram(): Command {
           opts.failUnder === undefined
             ? undefined
             : parseFailUnder(opts.failUnder);
-        const config = loadConfig(process.cwd());
+        const config = loadConfig(getRoot());
         const kb = fromConfig(
           cmd,
           "maxFileSize",
@@ -218,7 +236,7 @@ export function buildProgram(): Command {
         if (!Number.isFinite(days) || days <= 0) {
           throw new Error("--stale-days must be a positive number of days");
         }
-        const cwd = process.cwd();
+        const cwd = getRoot();
         const checks = [
           ...checkBasics(cwd),
           await checkLargeFiles(cwd, kb),
@@ -267,19 +285,19 @@ export function buildProgram(): Command {
               throw new Error("--to-tag cannot be combined with --to");
             }
             if (opts.fromTag) {
-              opts.from = await resolveTag(process.cwd(), opts.fromTag);
+              opts.from = await resolveTag(getRoot(), opts.fromTag);
             }
             if (opts.toTag) {
-              opts.to = await resolveTag(process.cwd(), opts.toTag);
+              opts.to = await resolveTag(getRoot(), opts.toTag);
             }
           }
           if (opts.write) {
             if (opts.from || opts.to !== "HEAD") {
               throw new Error("--write cannot be combined with --from/--to");
             }
-            const file = join(process.cwd(), "CHANGELOG.md");
+            const file = join(getRoot(), "CHANGELOG.md");
             const existing = existsSync(file) ? readFileSync(file, "utf8") : "";
-            const sections = await gatherChangelogByTag(process.cwd());
+            const sections = await gatherChangelogByTag(getRoot());
             writeFileSync(file, prependChangelog(existing, sections));
             console.log("Updated CHANGELOG.md");
             return;
@@ -288,17 +306,13 @@ export function buildProgram(): Command {
             if (opts.from || opts.to !== "HEAD") {
               throw new Error("--by-tag cannot be combined with --from/--to");
             }
-            const sections = await gatherChangelogByTag(process.cwd());
+            const sections = await gatherChangelogByTag(getRoot());
             console.log(formatChangelogSections(sections));
             return;
           }
-          const groups = await gatherChangelog(
-            process.cwd(),
-            opts.from,
-            opts.to,
-          );
+          const groups = await gatherChangelog(getRoot(), opts.from, opts.to);
           const heading = opts.to === "HEAD" ? "Unreleased" : opts.to;
-          const repoUrl = await originRepoUrl(process.cwd());
+          const repoUrl = await originRepoUrl(getRoot());
           const links = repoUrl
             ? {
                 repoUrl,
@@ -319,14 +333,14 @@ export function buildProgram(): Command {
     .option("--dry-run", "print the prompt without calling the API")
     .action(async (opts: { days: string; dryRun?: boolean }, cmd: Command) => {
       try {
-        const config = loadConfig(process.cwd());
+        const config = loadConfig(getRoot());
         const days = fromConfig(cmd, "days", opts.days, config.days);
         if (!Number.isInteger(days) || days <= 0) {
           throw new Error("--days must be a positive integer");
         }
         console.log(
           await summarize(
-            process.cwd(),
+            getRoot(),
             days,
             process.env,
             undefined,

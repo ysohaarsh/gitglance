@@ -255,3 +255,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `summary --dry-run` prints the exact prompt that would be sent to the model and exits without needing `ANTHROPIC_API_KEY` or making any network call. `summarize` takes a `dryRun` flag; test covers no key + no fetch; README documents it.
 - Decisions: dry run takes precedence over the missing-key message; empty range still reports "No commits"; no new dependencies.
 - Next: global `--repo <path>` option.
+
+## 2026-11-20
+
+- Done: global `--repo <path>` option (alias `-C`) so any command can analyze a repository elsewhere on disk. A `preAction` hook resolves and validates the path (`resolveRepoPath`), and all subcommands use it instead of `process.cwd()`; config lookup also starts from that directory. Tests cover default, missing path and a stats run against a fixture repo; README documents it.
+- Decisions: invalid path prints an error and exits 1 before the command runs; `-C` alias mirrors git; no new dependencies.
+- Next: `gitglance completion <bash|zsh|fish>`.

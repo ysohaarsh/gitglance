@@ -101,6 +101,15 @@ Put a `.gitglancerc.json` in the repository root to set defaults (it is also fou
 
 Supported keys: `limit`, `since`, `until` (stats), `maxFileSize`, `staleDays` (health) and `days` (summary). Unknown keys or wrong types produce an error.
 
+### Analyzing another repository
+
+Every command accepts the global `--repo <path>` option (alias `-C`) to analyze a repository elsewhere on disk instead of the current directory:
+
+```bash
+npx gitglance --repo ~/code/other-project stats
+npx gitglance -C ../api health
+```
+
 ## Install
 
 ```bash

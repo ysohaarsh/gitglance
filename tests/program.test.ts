@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildProgram } from "../src/program.js";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { buildProgram, resolveRepoPath } from "../src/program.js";
 import { VERSION } from "../src/version.js";
 
 function run(args: string[]): { out: string; code?: number } {
@@ -46,5 +50,40 @@ describe("program", () => {
 
   it("rejects unknown commands", () => {
     expect(run(["bogus"]).code).toBe(1);
+  });
+});
+
+describe("--repo", () => {
+  it("defaults to the current directory", () => {
+    expect(resolveRepoPath(undefined)).toBe(process.cwd());
+  });
+
+  it("rejects a missing path", () => {
+    expect(() => resolveRepoPath("/definitely/not/here")).toThrow(
+      "is not a directory",
+    );
+  });
+
+  it("runs a command against another repository", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "gg-repo-"));
+    const git = (...a: string[]) => execFileSync("git", a, { cwd: dir });
+    git("init", "-q");
+    git("config", "user.email", "a@x.dev");
+    git("config", "user.name", "Ann");
+    writeFileSync(join(dir, "f.txt"), "x");
+    git("add", ".");
+    git("commit", "-q", "-m", "feat: first");
+    const program = buildProgram();
+    let out = "";
+    const log = vi.spyOn(console, "log").mockImplementation((m: string) => {
+      out += `${m}\n`;
+    });
+    try {
+      await program.parseAsync(["node", "gitglance", "--repo", dir, "stats"]);
+    } finally {
+      log.mockRestore();
+    }
+    expect(out).toContain("Commits:");
+    expect(out).toContain("1");
   });
 });
