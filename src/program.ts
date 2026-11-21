@@ -29,6 +29,7 @@ import {
 } from "./health.js";
 import { createPainter, shouldColor } from "./color.js";
 import { summarize } from "./summary.js";
+import { generateCompletion, isShell, SHELLS } from "./completion.js";
 import { buildJsonReport } from "./report.js";
 import { loadConfig } from "./config.js";
 import { VERSION } from "./version.js";
@@ -351,6 +352,21 @@ export function buildProgram(): Command {
         console.error(err instanceof Error ? err.message : String(err));
         process.exitCode = 1;
       }
+    });
+
+  program
+    .command("completion")
+    .description("Print a shell completion script (bash, zsh or fish)")
+    .argument("<shell>", `shell to generate for: ${SHELLS.join(", ")}`)
+    .action((shell: string) => {
+      if (!isShell(shell)) {
+        console.error(
+          `Unknown shell "${shell}". Use one of: ${SHELLS.join(", ")}`,
+        );
+        process.exitCode = 1;
+        return;
+      }
+      process.stdout.write(generateCompletion(program, shell));
     });
   return program;
 }

@@ -62,4 +62,4 @@ Tasks are done top to bottom, one per day. Edit freely to steer the project.
 - [x] `changelog`: link commit hashes and compare URLs when an `origin` GitHub remote exists
 - [x] `summary --dry-run`: print the prompt that would be sent without calling the API
 - [x] Add `gitglance --repo <path>` global option to analyze a repository elsewhere on disk
-- [ ] Shell completion output via `gitglance completion <bash|zsh|fish>`
+- [x] Shell completion output via `gitglance completion <bash|zsh|fish>`

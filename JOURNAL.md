@@ -261,3 +261,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: global `--repo <path>` option (alias `-C`) so any command can analyze a repository elsewhere on disk. A `preAction` hook resolves and validates the path (`resolveRepoPath`), and all subcommands use it instead of `process.cwd()`; config lookup also starts from that directory. Tests cover default, missing path and a stats run against a fixture repo; README documents it.
 - Decisions: invalid path prints an error and exits 1 before the command runs; `-C` alias mirrors git; no new dependencies.
 - Next: `gitglance completion <bash|zsh|fish>`.
+
+## 2026-11-21
+
+- Done: `gitglance completion <bash|zsh|fish>` prints a completion script. New `src/completion.ts` derives subcommands and long options by introspecting the commander program, so scripts stay in sync as flags are added. Unknown shells exit 1 with a friendly message. Tests cover all three shells; README documents installation.
+- Decisions: completes subcommand names and long flags only (no value completion); no new dependencies.
+- Next: ROADMAP has no unchecked tasks left; the next run should add 10 new tasks.

@@ -110,6 +110,16 @@ npx gitglance --repo ~/code/other-project stats
 npx gitglance -C ../api health
 ```
 
+### Shell completion
+
+Print a completion script for your shell (subcommands and their options are included):
+
+```bash
+source <(gitglance completion bash)                  # bash, add to ~/.bashrc
+gitglance completion zsh > ~/.zfunc/_gitglance       # zsh, with ~/.zfunc in fpath
+gitglance completion fish > ~/.config/fish/completions/gitglance.fish
+```
+
 ## Install
 
 ```bash
