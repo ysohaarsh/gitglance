@@ -63,3 +63,16 @@ Tasks are done top to bottom, one per day. Edit freely to steer the project.
 - [x] `summary --dry-run`: print the prompt that would be sent without calling the API
 - [x] Add `gitglance --repo <path>` global option to analyze a repository elsewhere on disk
 - [x] Shell completion output via `gitglance completion <bash|zsh|fish>`
+
+## Phase 8: next ideas
+
+- [ ] `stats --by-month`: commits per month as an ASCII bar chart
+- [ ] `stats --exclude <glob>`: ignore paths (e.g. lockfiles) when computing churn hotspots
+- [ ] `stats --branch <name>`: analyze a specific branch or ref instead of HEAD
+- [ ] `health`: flag very old unmerged branches separately from merely stale ones
+- [ ] `health --json`: machine-readable health report with per-check results
+- [ ] `health`: check for a test directory or test script as an optional check
+- [ ] `changelog --format json`: structured output grouped by version and type
+- [ ] `changelog`: honor `!` and `BREAKING CHANGE:` with a dedicated "Breaking changes" section
+- [ ] `summary --since <date>`: alternative to `--days` for choosing the summary range
+- [ ] Config file: allow default values for `--fail-under`, `--limit` and `--since`

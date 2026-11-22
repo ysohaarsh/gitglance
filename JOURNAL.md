@@ -267,3 +267,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `gitglance completion <bash|zsh|fish>` prints a completion script. New `src/completion.ts` derives subcommands and long options by introspecting the commander program, so scripts stay in sync as flags are added. Unknown shells exit 1 with a friendly message. Tests cover all three shells; README documents installation.
 - Decisions: completes subcommand names and long flags only (no value completion); no new dependencies.
 - Next: ROADMAP has no unchecked tasks left; the next run should add 10 new tasks.
+
+## 2026-11-22
+
+- Done: ROADMAP had no unchecked tasks, so added Phase 8 with 10 new tasks (stats by month/branch/exclude, health JSON and test check, changelog JSON and breaking-changes section, summary `--since`, config defaults).
+- Decisions: planning-only commit as the procedure requires; no code changed.
+- Next: `stats --by-month`.
