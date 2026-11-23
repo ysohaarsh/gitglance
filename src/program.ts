@@ -14,7 +14,12 @@ import { formatChurn, gatherChurn } from "./churn.js";
 import { formatCsv } from "./csv.js";
 import { computeStreaks, formatStreaks } from "./streaks.js";
 import { computePace, formatPace } from "./pace.js";
-import { computeActivity, formatActivity } from "./activity.js";
+import {
+  computeActivity,
+  computeMonthly,
+  formatActivity,
+  formatMonthly,
+} from "./activity.js";
 import { formatContributors, formatStats, gatherReport } from "./stats.js";
 import {
   checkBasics,
@@ -103,6 +108,7 @@ export function buildProgram(): Command {
     .find((c) => c.name() === "stats")
     ?.option("-l, --limit <n>", "number of top contributors to show", "5")
     .option("--charts", "show commits per weekday and per hour")
+    .option("--by-month", "show commits per calendar month")
     .option("--hotspots", "show the most-changed files")
     .option("--streaks", "show longest and current daily commit streaks")
     .option("--pace", "show average commits per week and the busiest day")
@@ -120,6 +126,7 @@ export function buildProgram(): Command {
         opts: {
           limit: string;
           charts?: boolean;
+          byMonth?: boolean;
           hotspots?: boolean;
           streaks?: boolean;
           pace?: boolean;
@@ -182,6 +189,7 @@ export function buildProgram(): Command {
               opts.charts
                 ? formatActivity(computeActivity(commits), paint)
                 : "",
+              opts.byMonth ? formatMonthly(computeMonthly(commits), paint) : "",
             ]
               .filter(Boolean)
               .join("\n\n"),

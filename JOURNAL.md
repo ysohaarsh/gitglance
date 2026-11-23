@@ -273,3 +273,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: ROADMAP had no unchecked tasks, so added Phase 8 with 10 new tasks (stats by month/branch/exclude, health JSON and test check, changelog JSON and breaking-changes section, summary `--since`, config defaults).
 - Decisions: planning-only commit as the procedure requires; no code changed.
 - Next: `stats --by-month`.
+
+## 2026-11-23
+
+- Done: `stats --by-month` prints commits per calendar month as an ASCII bar chart. New `computeMonthly` / `formatMonthly` in `src/activity.ts` reuse the existing bar renderer; months without commits between the first and last are shown as zero. Tests cover gaps across years, empty input and rendering; README documents it.
+- Decisions: text output only (not added to the JSON report to keep its shape stable); author-local months, matching the weekday/hour charts; no new dependencies.
+- Next: `stats --exclude <glob>`.

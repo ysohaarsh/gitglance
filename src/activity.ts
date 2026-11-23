@@ -58,3 +58,56 @@ export function formatActivity(
     ...bars(hourLabels, activity.hours, paint),
   ].join("\n");
 }
+
+/** One calendar month (author-local) and its commit count. */
+export interface MonthCount {
+  /** Month as `YYYY-MM`. */
+  month: string;
+  count: number;
+}
+
+/**
+ * Count commits per calendar month, from the first to the last month that
+ * has commits. Months in between without commits are included with 0.
+ */
+export function computeMonthly(commits: Commit[]): MonthCount[] {
+  const counts = new Map<string, number>();
+  for (const { date } of commits) {
+    const m = /^(\d{4})-(\d{2})/.exec(date);
+    if (!m) continue;
+    const key = `${m[1]}-${m[2]}`;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  if (counts.size === 0) return [];
+  const keys = [...counts.keys()].sort();
+  const [first, last] = [keys[0]!, keys[keys.length - 1]!];
+  const result: MonthCount[] = [];
+  let year = +first.slice(0, 4);
+  let month = +first.slice(5);
+  for (;;) {
+    const key = `${year}-${String(month).padStart(2, "0")}`;
+    result.push({ month: key, count: counts.get(key) ?? 0 });
+    if (key === last) break;
+    if (++month > 12) {
+      month = 1;
+      year++;
+    }
+  }
+  return result;
+}
+
+export function formatMonthly(
+  months: MonthCount[],
+  paint: Painter = plain,
+): string {
+  return [
+    paint.bold("Commits by month:"),
+    ...(months.length === 0
+      ? ["  (no commits)"]
+      : bars(
+          months.map((m) => m.month),
+          months.map((m) => m.count),
+          paint,
+        )),
+  ].join("\n");
+}

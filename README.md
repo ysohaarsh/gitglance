@@ -47,6 +47,14 @@ Commits by weekday:
   ...
 ```
 
+Add `--by-month` to print commits per calendar month (author-local, gaps filled with zero) as a bar chart:
+
+```
+Commits by month:
+  2026-09 ██████████████████████████████ 12
+  2026-10 ███████████████                 6
+```
+
 Add `--streaks` to show the longest and current daily commit streaks (author-local dates; the current streak counts only if the last commit day is today or yesterday). The JSON output always includes a `streaks` object.
 
 ```

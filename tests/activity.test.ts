@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { Commit } from "../src/git.js";
-import { computeActivity, formatActivity } from "../src/activity.js";
+import {
+  computeActivity,
+  computeMonthly,
+  formatActivity,
+  formatMonthly,
+} from "../src/activity.js";
 import { createPainter } from "../src/color.js";
 
 function at(date: string): Commit {
@@ -70,5 +75,34 @@ describe("formatActivity color", () => {
     // eslint-disable-next-line no-control-regex
     const strip = (s: string) => s.replace(/\u001b\[\d+m/g, "");
     expect(strip(formatActivity(a, paint))).toBe(formatActivity(a));
+  });
+});
+
+describe("computeMonthly", () => {
+  it("counts per month and fills gaps across years", () => {
+    const m = computeMonthly([
+      at("2026-01-05T10:00:00+00:00"),
+      at("2025-11-30T10:00:00+00:00"),
+      at("2026-01-20T10:00:00+00:00"),
+    ]);
+    expect(m).toEqual([
+      { month: "2025-11", count: 1 },
+      { month: "2025-12", count: 0 },
+      { month: "2026-01", count: 2 },
+    ]);
+  });
+
+  it("returns an empty list and message for no commits", () => {
+    expect(computeMonthly([])).toEqual([]);
+    expect(formatMonthly([])).toContain("(no commits)");
+  });
+
+  it("renders a bar per month", () => {
+    const out = formatMonthly(
+      computeMonthly([at("2026-02-01T00:00:00Z"), at("2026-02-02T00:00:00Z")]),
+    );
+    expect(out).toContain("Commits by month:");
+    expect(out).toContain("2026-02 ");
+    expect(out).toContain("█");
   });
 });
