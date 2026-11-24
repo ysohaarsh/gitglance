@@ -115,6 +115,10 @@ export function buildProgram(): Command {
     .option("--since <date>", "only count commits after this date")
     .option("--until <date>", "only count commits before this date")
     .option("--author <text>", "only count commits by this name or email")
+    .option(
+      "--exclude <glob...>",
+      "ignore matching paths in churn hotspots (e.g. package-lock.json)",
+    )
     .option("--json", "print all stats as JSON")
     .option(
       "--format <format>",
@@ -128,6 +132,7 @@ export function buildProgram(): Command {
           charts?: boolean;
           byMonth?: boolean;
           hotspots?: boolean;
+          exclude?: string[];
           streaks?: boolean;
           pace?: boolean;
           json?: boolean;
@@ -155,18 +160,19 @@ export function buildProgram(): Command {
             until: opts.until,
             author: opts.author,
           };
+          const churnRange = { ...range, exclude: opts.exclude };
           const { stats, top, commits } = await gatherReport(
             getRoot(),
             limit,
             range,
           );
           if (format === "csv") {
-            const hotspots = await gatherChurn(getRoot(), limit, range);
+            const hotspots = await gatherChurn(getRoot(), limit, churnRange);
             console.log(formatCsv(top, hotspots));
             return;
           }
           if (format === "json") {
-            const hotspots = await gatherChurn(getRoot(), limit, range);
+            const hotspots = await gatherChurn(getRoot(), limit, churnRange);
             console.log(
               JSON.stringify(
                 buildJsonReport(stats, top, hotspots, commits),
@@ -184,7 +190,10 @@ export function buildProgram(): Command {
               opts.streaks ? formatStreaks(computeStreaks(commits), paint) : "",
               opts.pace ? formatPace(computePace(commits), paint) : "",
               opts.hotspots
-                ? formatChurn(await gatherChurn(getRoot(), limit, range), paint)
+                ? formatChurn(
+                    await gatherChurn(getRoot(), limit, churnRange),
+                    paint,
+                  )
                 : "",
               opts.charts
                 ? formatActivity(computeActivity(commits), paint)

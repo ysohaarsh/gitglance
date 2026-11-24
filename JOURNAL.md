@@ -279,3 +279,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `stats --by-month` prints commits per calendar month as an ASCII bar chart. New `computeMonthly` / `formatMonthly` in `src/activity.ts` reuse the existing bar renderer; months without commits between the first and last are shown as zero. Tests cover gaps across years, empty input and rendering; README documents it.
 - Decisions: text output only (not added to the JSON report to keep its shape stable); author-local months, matching the weekday/hour charts; no new dependencies.
 - Next: `stats --exclude <glob>`.
+
+## 2026-11-24
+
+- Done: `stats --exclude <glob...>` ignores matching paths in churn hotspots (text, JSON and CSV). New `globToRegExp` / `excludePaths` in `src/churn.ts`; filtering happens after parsing `git log` output. Tests cover glob semantics and filtering; README documents it.
+- Decisions: tiny built-in glob matcher (`*`, `**`, `?`; slash-less patterns match any basename) instead of a dependency; applies only to hotspots since other stats are commit-based.
+- Next: `stats --branch <name>`.

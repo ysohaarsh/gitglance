@@ -23,6 +23,35 @@ export function parseChurn(raw: string): Map<string, number> {
   return counts;
 }
 
+/** Convert a glob (`*`, `**`, `?`) to a RegExp; slash-less globs match any basename. */
+export function globToRegExp(glob: string): RegExp {
+  let re = "";
+  for (let i = 0; i < glob.length; i++) {
+    const c = glob.charAt(i);
+    if (c === "*") {
+      if (glob[i + 1] === "*") {
+        i++;
+        if (glob[i + 1] === "/") {
+          i++;
+          re += "(?:.*/)?";
+        } else re += ".*";
+      } else re += "[^/]*";
+    } else if (c === "?") re += "[^/]";
+    else re += c.replace(/[.+^${}()|[\]\\]/g, "\\$&");
+  }
+  return new RegExp(`^${glob.includes("/") ? "" : "(?:.*/)?"}${re}$`);
+}
+
+/** Drop paths matching any of the globs. */
+export function excludePaths(
+  counts: Map<string, number>,
+  globs: string[],
+): Map<string, number> {
+  if (globs.length === 0) return counts;
+  const res = globs.map(globToRegExp);
+  return new Map([...counts].filter(([p]) => !res.some((r) => r.test(p))));
+}
+
 /** Rank files by commit count (ties by path), at most `limit`. */
 export function topChurn(
   counts: Map<string, number>,
@@ -52,7 +81,9 @@ export function formatChurn(list: FileChurn[], paint: Painter = plain): string {
 export async function gatherChurn(
   cwd: string,
   limit: number,
-  range: Pick<LogOptions, "since" | "until" | "author"> = {},
+  range: Pick<LogOptions, "since" | "until" | "author"> & {
+    exclude?: string[];
+  } = {},
 ): Promise<FileChurn[]> {
   if (!(await isGitRepo(cwd))) {
     throw new Error(`${cwd} is not a git repository`);
@@ -71,5 +102,5 @@ export async function gatherChurn(
   if (range.author) args.push(...authorArgs(range.author));
   args.push("HEAD");
   const raw = await runGit(cwd, args);
-  return topChurn(parseChurn(raw), limit);
+  return topChurn(excludePaths(parseChurn(raw), range.exclude ?? []), limit);
 }

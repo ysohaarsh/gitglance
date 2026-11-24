@@ -4,7 +4,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  excludePaths,
   formatChurn,
+  globToRegExp,
   gatherChurn,
   parseChurn,
   topChurn,
@@ -93,5 +95,28 @@ describe("formatChurn color", () => {
     expect(out).toContain("\u001b[32m2\u001b[39m");
     // eslint-disable-next-line no-control-regex
     expect(out.replace(/\u001b\[\d+m/g, "")).toBe(formatChurn(list));
+  });
+});
+
+describe("exclude globs", () => {
+  it("matches basenames, directories and ** patterns", () => {
+    expect(globToRegExp("*.lock").test("a/b/yarn.lock")).toBe(true);
+    expect(globToRegExp("*.lock").test("yarn.lock.bak")).toBe(false);
+    expect(globToRegExp("docs/**").test("docs/a/b.md")).toBe(true);
+    expect(globToRegExp("docs/*.md").test("docs/a/b.md")).toBe(false);
+    expect(globToRegExp("**/x.ts").test("x.ts")).toBe(true);
+    expect(globToRegExp("a?.ts").test("ab.ts")).toBe(true);
+    expect(globToRegExp("a.ts").test("ba.ts")).toBe(false);
+  });
+
+  it("removes excluded paths from counts", () => {
+    const m = new Map([
+      ["package-lock.json", 9],
+      ["src/a.ts", 2],
+    ]);
+    expect([...excludePaths(m, ["package-lock.json"]).keys()]).toEqual([
+      "src/a.ts",
+    ]);
+    expect(excludePaths(m, [])).toBe(m);
   });
 });
