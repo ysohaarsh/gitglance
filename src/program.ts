@@ -115,6 +115,7 @@ export function buildProgram(): Command {
     .option("--since <date>", "only count commits after this date")
     .option("--until <date>", "only count commits before this date")
     .option("--author <text>", "only count commits by this name or email")
+    .option("--branch <name>", "analyze this branch or ref instead of HEAD")
     .option(
       "--exclude <glob...>",
       "ignore matching paths in churn hotspots (e.g. package-lock.json)",
@@ -140,6 +141,7 @@ export function buildProgram(): Command {
           since?: string;
           until?: string;
           author?: string;
+          branch?: string;
         },
         cmd: Command,
       ) => {
@@ -159,6 +161,7 @@ export function buildProgram(): Command {
             since: opts.since,
             until: opts.until,
             author: opts.author,
+            range: opts.branch,
           };
           const churnRange = { ...range, exclude: opts.exclude };
           const { stats, top, commits } = await gatherReport(

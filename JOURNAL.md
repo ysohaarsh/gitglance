@@ -285,3 +285,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `stats --exclude <glob...>` ignores matching paths in churn hotspots (text, JSON and CSV). New `globToRegExp` / `excludePaths` in `src/churn.ts`; filtering happens after parsing `git log` output. Tests cover glob semantics and filtering; README documents it.
 - Decisions: tiny built-in glob matcher (`*`, `**`, `?`; slash-less patterns match any basename) instead of a dependency; applies only to hotspots since other stats are commit-based.
 - Next: `stats --branch <name>`.
+
+## 2026-11-25
+
+- Done: `stats --branch <name>` analyzes a branch or ref instead of `HEAD`. Added `refExists` in `src/git.ts`; `gatherReport` validates the ref (friendly error, exit code 1) and passes it as the log range; `gatherChurn` uses it too, so hotspots, JSON and CSV agree. Tests build a fixture repo with a feature branch; README documents it.
+- Decisions: accepts any revision (branch, tag, SHA), not only branches; no new dependencies.
+- Next: `health`: flag very old unmerged branches separately from stale ones.

@@ -81,7 +81,7 @@ export function formatChurn(list: FileChurn[], paint: Painter = plain): string {
 export async function gatherChurn(
   cwd: string,
   limit: number,
-  range: Pick<LogOptions, "since" | "until" | "author"> & {
+  range: Pick<LogOptions, "since" | "until" | "author" | "range"> & {
     exclude?: string[];
   } = {},
 ): Promise<FileChurn[]> {
@@ -100,7 +100,7 @@ export async function gatherChurn(
   if (range.since) args.push(`--since=${range.since}`);
   if (range.until) args.push(`--until=${range.until}`);
   if (range.author) args.push(...authorArgs(range.author));
-  args.push("HEAD");
+  args.push(range.range ?? "HEAD");
   const raw = await runGit(cwd, args);
   return topChurn(excludePaths(parseChurn(raw), range.exclude ?? []), limit);
 }

@@ -87,3 +87,69 @@ describe("--repo", () => {
     expect(out).toContain("1");
   });
 });
+
+describe("stats --branch", () => {
+  function repo(): string {
+    const dir = mkdtempSync(join(tmpdir(), "gg-branch-"));
+    const git = (...a: string[]): void => {
+      execFileSync("git", a, { cwd: dir, stdio: "ignore" });
+    };
+    git("init", "-q", "-b", "main");
+    git("config", "user.name", "T");
+    git("config", "user.email", "t@example.com");
+    git("config", "commit.gpgsign", "false");
+    writeFileSync(join(dir, "a.txt"), "a");
+    git("add", ".");
+    git("commit", "-q", "-m", "one");
+    git("checkout", "-q", "-b", "feature");
+    writeFileSync(join(dir, "b.txt"), "b");
+    git("add", ".");
+    git("commit", "-q", "-m", "two");
+    git("checkout", "-q", "main");
+    return dir;
+  }
+
+  async function stats(dir: string, ...extra: string[]): Promise<string> {
+    let out = "";
+    const log = vi.spyOn(console, "log").mockImplementation((m: string) => {
+      out += `${m}\n`;
+    });
+    try {
+      await buildProgram().parseAsync([
+        "node",
+        "gitglance",
+        "--repo",
+        dir,
+        "stats",
+        "--format",
+        "json",
+        ...extra,
+      ]);
+    } finally {
+      log.mockRestore();
+    }
+    return out;
+  }
+
+  it("analyzes the given branch instead of HEAD", async () => {
+    const dir = repo();
+    expect(JSON.parse(await stats(dir)).stats.totalCommits).toBe(1);
+    expect(
+      JSON.parse(await stats(dir, "--branch", "feature")).stats.totalCommits,
+    ).toBe(2);
+  });
+
+  it("fails for an unknown branch", async () => {
+    const dir = repo();
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    const prev = process.exitCode;
+    try {
+      await stats(dir, "--branch", "nope");
+      expect(String(err.mock.calls[0]?.[0])).toContain("unknown branch");
+      expect(process.exitCode).toBe(1);
+    } finally {
+      process.exitCode = prev;
+      err.mockRestore();
+    }
+  });
+});

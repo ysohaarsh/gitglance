@@ -68,7 +68,7 @@ Tasks are done top to bottom, one per day. Edit freely to steer the project.
 
 - [x] `stats --by-month`: commits per month as an ASCII bar chart
 - [x] `stats --exclude <glob>`: ignore paths (e.g. lockfiles) when computing churn hotspots
-- [ ] `stats --branch <name>`: analyze a specific branch or ref instead of HEAD
+- [x] `stats --branch <name>`: analyze a specific branch or ref instead of HEAD
 - [ ] `health`: flag very old unmerged branches separately from merely stale ones
 - [ ] `health --json`: machine-readable health report with per-check results
 - [ ] `health`: check for a test directory or test script as an optional check

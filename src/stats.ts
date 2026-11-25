@@ -4,6 +4,7 @@ import {
   getCommits,
   hasCommits,
   isGitRepo,
+  refExists,
   type LogOptions,
 } from "./git.js";
 
@@ -87,7 +88,10 @@ export async function gatherStats(cwd: string): Promise<RepoStats> {
 }
 
 /** Optional date bounds, in any format `git log --since/--until` accepts. */
-export type DateRange = Pick<LogOptions, "since" | "until" | "author">;
+export type DateRange = Pick<
+  LogOptions,
+  "since" | "until" | "author" | "range"
+>;
 
 /** Stats plus the top `limit` contributors for the repository at `cwd`. */
 export async function gatherReport(
@@ -97,6 +101,9 @@ export async function gatherReport(
 ): Promise<{ stats: RepoStats; top: Contributor[]; commits: Commit[] }> {
   if (!(await isGitRepo(cwd))) {
     throw new Error(`${cwd} is not a git repository`);
+  }
+  if (range.range && !(await refExists(cwd, range.range))) {
+    throw new Error(`--branch: unknown branch or ref "${range.range}"`);
   }
   const commits = (await hasCommits(cwd)) ? await getCommits(cwd, range) : [];
   return {

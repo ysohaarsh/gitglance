@@ -47,6 +47,8 @@ Commits by weekday:
   ...
 ```
 
+Add `--branch <name>` to analyze a specific branch or ref instead of `HEAD`.
+
 Add `--exclude <glob...>` to ignore paths (e.g. `--exclude package-lock.json "*.md" "docs/**"`) in the most-changed files; globs support `*`, `**` and `?`, and a pattern without `/` matches that name in any directory.
 
 Add `--by-month` to print commits per calendar month (author-local, gaps filled with zero) as a bar chart:

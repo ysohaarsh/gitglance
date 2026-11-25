@@ -74,6 +74,16 @@ export async function hasCommits(cwd: string): Promise<boolean> {
   }
 }
 
+/** True when `ref` resolves to a commit (branch, tag or any revision). */
+export async function refExists(cwd: string, ref: string): Promise<boolean> {
+  try {
+    await runGit(cwd, ["rev-parse", "--verify", "--quiet", `${ref}^{commit}`]);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function currentBranch(cwd: string): Promise<string> {
   const out = await runGit(cwd, ["rev-parse", "--abbrev-ref", "HEAD"]);
   return out.trim();
