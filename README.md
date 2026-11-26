@@ -151,6 +151,7 @@ PASS  .gitignore      .gitignore
 PASS  CI config       .github/workflows
 PASS  Large files     none over 1024 KB
 PASS  Stale branches  none older than 90 days
+PASS  Old unmerged branches  none older than 180 days
 FAIL  TODO/FIXME      12 in 5 files: src/health.ts (4), JOURNAL.md (3), README.md (2), +2 more
 PASS  Secrets         no secrets-like files tracked
 WARN  CONTRIBUTING    not found (optional)
@@ -163,7 +164,8 @@ Points lost:
 
 ```bash
 npx gitglance health --max-file-size 500   # flag tracked files >= 500 KB (default 1024)
-npx gitglance health --stale-days 30       # flag local branches idle for >= 30 days (default 90)
+npx gitglance health --stale-days 30       # flag local branches idle for >= 30 days (default 90);
+                                           # unmerged ones idle for twice that are reported separately
 npx gitglance health --fail-under 80       # exit 1 if the score is below 80 (for CI)
 ```
 

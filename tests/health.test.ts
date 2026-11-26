@@ -9,6 +9,7 @@ import {
   checkSecrets,
   findSecretFiles,
   checkLargeFiles,
+  checkOldUnmergedBranches,
   checkStaleBranches,
   checkTodos,
   computeScore,
@@ -184,6 +185,55 @@ describe("checkStaleBranches", () => {
     const root = tmp();
     git(root, ["init", "-q"]);
     expect((await checkStaleBranches(root, 90)).passed).toBe(true);
+    expect((await checkOldUnmergedBranches(root, 90)).passed).toBe(true);
+  });
+
+  it("reports old unmerged branches apart from merged stale ones", async () => {
+    const root = tmp();
+    git(root, ["init", "-q", "-b", "main"]);
+    git(
+      root,
+      ["commit", "-q", "--allow-empty", "-m", "a"],
+      "2020-01-01T00:00:00Z",
+    );
+    git(root, ["branch", "merged"]);
+    git(root, ["checkout", "-q", "-b", "wip"]);
+    git(
+      root,
+      ["commit", "-q", "--allow-empty", "-m", "b"],
+      "2020-01-02T00:00:00Z",
+    );
+    git(root, ["checkout", "-q", "main"]);
+    const now = Date.UTC(2021, 11, 31);
+
+    const stale = await checkStaleBranches(root, 90, now);
+    expect(stale.detail).toContain("merged (");
+    expect(stale.detail).not.toContain("wip");
+
+    const old = await checkOldUnmergedBranches(root, 90, now);
+    expect(old.passed).toBe(false);
+    expect(old.detail).toContain("wip (");
+    expect(old.detail).not.toContain("merged (");
+  });
+
+  it("treats unmerged branches below twice the threshold as merely stale", async () => {
+    const root = tmp();
+    git(root, ["init", "-q", "-b", "main"]);
+    git(
+      root,
+      ["commit", "-q", "--allow-empty", "-m", "a"],
+      "2020-01-01T00:00:00Z",
+    );
+    git(root, ["checkout", "-q", "-b", "wip"]);
+    git(
+      root,
+      ["commit", "-q", "--allow-empty", "-m", "b"],
+      "2020-01-02T00:00:00Z",
+    );
+    git(root, ["checkout", "-q", "main"]);
+    const now = Date.UTC(2020, 5, 1); // ~150 days: stale at 90, not very old at 180
+    expect((await checkStaleBranches(root, 90, now)).detail).toContain("wip (");
+    expect((await checkOldUnmergedBranches(root, 90, now)).passed).toBe(true);
   });
 });
 

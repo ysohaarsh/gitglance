@@ -291,3 +291,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `stats --branch <name>` analyzes a branch or ref instead of `HEAD`. Added `refExists` in `src/git.ts`; `gatherReport` validates the ref (friendly error, exit code 1) and passes it as the log range; `gatherChurn` uses it too, so hotspots, JSON and CSV agree. Tests build a fixture repo with a feature branch; README documents it.
 - Decisions: accepts any revision (branch, tag, SHA), not only branches; no new dependencies.
 - Next: `health`: flag very old unmerged branches separately from stale ones.
+
+## 2026-11-26
+
+- Done: `health` now reports very old unmerged branches separately from merely stale ones. New `checkOldUnmergedBranches` flags local branches not merged into HEAD and idle for 2x the stale threshold (`OLD_UNMERGED_FACTOR`); `checkStaleBranches` skips those so a branch is never double counted. New check has weight 5 in the score. Tests cover merged vs unmerged and the 2x boundary; README documents it.
+- Decisions: "very old" is derived from `--stale-days` rather than a new flag; unmerged is relative to HEAD; no new dependencies.
+- Next: `health --json`.

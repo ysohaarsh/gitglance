@@ -145,36 +145,101 @@ export function parseStaleBranches(
   return stale.sort((a, b) => b.days - a.days || a.name.localeCompare(b.name));
 }
 
-/** Check for local branches whose last commit is at least `staleDays` days old. */
+/** Unmerged branches are "very old" once idle for this many times the stale threshold. */
+export const OLD_UNMERGED_FACTOR = 2;
+
+async function listBranchRefs(cwd: string): Promise<string | undefined> {
+  try {
+    return await runGit(cwd, [
+      "for-each-ref",
+      "--format=%(HEAD)\t%(refname:short)\t%(committerdate:unix)",
+      "refs/heads",
+    ]);
+  } catch {
+    return undefined;
+  }
+}
+
+/** Names of local branches whose tip is not reachable from HEAD. */
+async function unmergedBranchNames(cwd: string): Promise<Set<string>> {
+  try {
+    const out = await runGit(cwd, [
+      "branch",
+      "--no-merged",
+      "HEAD",
+      "--format=%(refname:short)",
+    ]);
+    return new Set(out.split("\n").filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
+function summarizeBranches(branches: StaleBranch[]): string {
+  const shown = branches
+    .slice(0, 3)
+    .map((b) => `${b.name} (${b.days}d)`)
+    .join(", ");
+  const more = branches.length > 3 ? `, +${branches.length - 3} more` : "";
+  return shown + more;
+}
+
+/**
+ * Check for very old branches holding commits that never reached HEAD: idle for
+ * at least `OLD_UNMERGED_FACTOR` x `staleDays` days. These may contain lost work,
+ * so they are reported apart from merely stale branches.
+ */
+export async function checkOldUnmergedBranches(
+  cwd: string,
+  staleDays: number,
+  nowMs: number = Date.now(),
+): Promise<HealthCheck> {
+  const name = "Old unmerged branches";
+  const out = await listBranchRefs(cwd);
+  if (out === undefined) {
+    return { name, passed: true, detail: "skipped (no branches to inspect)" };
+  }
+  const threshold = staleDays * OLD_UNMERGED_FACTOR;
+  const unmerged = await unmergedBranchNames(cwd);
+  const old = parseStaleBranches(out, threshold, nowMs).filter((b) =>
+    unmerged.has(b.name),
+  );
+  if (old.length === 0) {
+    return { name, passed: true, detail: `none older than ${threshold} days` };
+  }
+  return {
+    name,
+    passed: false,
+    detail: `${old.length} unmerged and older than ${threshold} days: ${summarizeBranches(old)}`,
+  };
+}
+
+/**
+ * Check for local branches whose last commit is at least `staleDays` days old.
+ * Very old unmerged branches are left to `checkOldUnmergedBranches`.
+ */
 export async function checkStaleBranches(
   cwd: string,
   staleDays: number,
   nowMs: number = Date.now(),
 ): Promise<HealthCheck> {
   const name = "Stale branches";
-  let out: string;
-  try {
-    out = await runGit(cwd, [
-      "for-each-ref",
-      "--format=%(HEAD)\t%(refname:short)\t%(committerdate:unix)",
-      "refs/heads",
-    ]);
-  } catch {
+  const out = await listBranchRefs(cwd);
+  if (out === undefined) {
     return { name, passed: true, detail: "skipped (no branches to inspect)" };
   }
-  const stale = parseStaleBranches(out, staleDays, nowMs);
+  const unmerged = await unmergedBranchNames(cwd);
+  const veryOld = staleDays * OLD_UNMERGED_FACTOR;
+  const stale = parseStaleBranches(out, staleDays, nowMs).filter(
+    (b) => !(unmerged.has(b.name) && b.days >= veryOld),
+  );
   if (stale.length === 0) {
     return { name, passed: true, detail: `none older than ${staleDays} days` };
   }
-  const shown = stale
-    .slice(0, 3)
-    .map((b) => `${b.name} (${b.days}d)`)
-    .join(", ");
-  const more = stale.length > 3 ? `, +${stale.length - 3} more` : "";
   return {
     name,
     passed: false,
-    detail: `${stale.length} older than ${staleDays} days: ${shown}${more}`,
+    detail: `${stale.length} older than ${staleDays} days: ${summarizeBranches(stale)}`,
   };
 }
 
@@ -261,6 +326,7 @@ const CHECK_WEIGHTS: Record<string, number> = {
   "CI config": 20,
   "Large files": 15,
   "Stale branches": 10,
+  "Old unmerged branches": 5,
   "TODO/FIXME": 20,
   Secrets: 20,
 };
