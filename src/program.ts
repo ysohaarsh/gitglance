@@ -32,6 +32,7 @@ import {
   computeScore,
   formatHealth,
   parseFailUnder,
+  buildHealthReport,
 } from "./health.js";
 import { createPainter, shouldColor } from "./color.js";
 import { summarize } from "./summary.js";
@@ -230,9 +231,15 @@ export function buildProgram(): Command {
       "--fail-under <score>",
       "exit with code 1 when the health score is below this (0-100)",
     )
+    .option("--json", "print a machine-readable JSON report")
     .action(
       async (
-        opts: { maxFileSize: string; staleDays: string; failUnder?: string },
+        opts: {
+          maxFileSize: string;
+          staleDays: string;
+          failUnder?: string;
+          json?: boolean;
+        },
         cmd: Command,
       ) => {
         const failUnder =
@@ -268,7 +275,11 @@ export function buildProgram(): Command {
           await checkSecrets(cwd),
           ...checkOptional(cwd),
         ];
-        console.log(formatHealth(checks, createPainter(shouldColor())));
+        console.log(
+          opts.json
+            ? JSON.stringify(buildHealthReport(checks), null, 2)
+            : formatHealth(checks, createPainter(shouldColor())),
+        );
         if (failUnder !== undefined) {
           const { score } = computeScore(checks);
           if (score < failUnder) {

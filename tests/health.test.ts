@@ -12,6 +12,7 @@ import {
   checkOldUnmergedBranches,
   checkStaleBranches,
   checkTodos,
+  buildHealthReport,
   computeScore,
   formatHealth,
   parseLargeFiles,
@@ -360,5 +361,26 @@ describe("parseFailUnder", () => {
     for (const bad of ["", "abc", "-1", "101"]) {
       expect(() => parseFailUnder(bad)).toThrow(/between 0 and 100/);
     }
+  });
+});
+
+describe("buildHealthReport", () => {
+  it("lists every check and scores only the non-optional ones", () => {
+    const report = buildHealthReport([
+      { name: "README", passed: true, detail: "README.md" },
+      { name: "LICENSE", passed: false, detail: "not found" },
+      { name: "SECURITY", passed: false, detail: "not found", optional: true },
+    ]);
+    expect(report.total).toBe(2);
+    expect(report.passed).toBe(1);
+    expect(report.score).toBe(
+      computeScore([
+        { name: "README", passed: true, detail: "" },
+        { name: "LICENSE", passed: false, detail: "" },
+      ]).score,
+    );
+    expect(report.checks.map((c) => c.optional)).toEqual([false, false, true]);
+    expect(report.deductions).toHaveLength(1);
+    expect(JSON.parse(JSON.stringify(report))).toEqual(report);
   });
 });

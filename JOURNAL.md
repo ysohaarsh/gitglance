@@ -297,3 +297,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `health` now reports very old unmerged branches separately from merely stale ones. New `checkOldUnmergedBranches` flags local branches not merged into HEAD and idle for 2x the stale threshold (`OLD_UNMERGED_FACTOR`); `checkStaleBranches` skips those so a branch is never double counted. New check has weight 5 in the score. Tests cover merged vs unmerged and the 2x boundary; README documents it.
 - Decisions: "very old" is derived from `--stale-days` rather than a new flag; unmerged is relative to HEAD; no new dependencies.
 - Next: `health --json`.
+
+## 2026-11-27
+
+- Done: `health --json` prints a machine-readable report (`score`, `passed`, `total`, per-check `name`/`passed`/`detail`/`optional`, and `deductions`). New `buildHealthReport` in `src/health.ts`; the text output is unchanged. Test covers optional checks being unscored and JSON round-tripping; README documents it.
+- Decisions: optional is always a boolean in JSON for a stable shape; works together with `--fail-under` (exit code still applies); no new dependencies.
+- Next: `health`: check for a test directory or test script as an optional check.

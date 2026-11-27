@@ -167,6 +167,7 @@ npx gitglance health --max-file-size 500   # flag tracked files >= 500 KB (defau
 npx gitglance health --stale-days 30       # flag local branches idle for >= 30 days (default 90);
                                            # unmerged ones idle for twice that are reported separately
 npx gitglance health --fail-under 80       # exit 1 if the score is below 80 (for CI)
+npx gitglance health --json                # machine-readable report: score, per-check results, deductions
 ```
 
 ### `changelog`

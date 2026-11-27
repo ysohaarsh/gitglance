@@ -364,6 +364,32 @@ export function parseFailUnder(value: string): number {
   return n;
 }
 
+export interface HealthReport {
+  score: number;
+  passed: number;
+  total: number;
+  checks: HealthCheck[];
+  deductions: string[];
+}
+
+/** Machine-readable report: per-check results plus the score. Optional checks are marked and unscored. */
+export function buildHealthReport(checks: HealthCheck[]): HealthReport {
+  const scored = checks.filter((c) => !c.optional);
+  const { score, deductions } = computeScore(checks);
+  return {
+    score,
+    passed: scored.filter((c) => c.passed).length,
+    total: scored.length,
+    checks: checks.map((c) => ({
+      name: c.name,
+      passed: c.passed,
+      detail: c.detail,
+      optional: c.optional === true,
+    })),
+    deductions,
+  };
+}
+
 export function formatHealth(
   checks: HealthCheck[],
   paint: Painter = plain,

@@ -70,7 +70,7 @@ Tasks are done top to bottom, one per day. Edit freely to steer the project.
 - [x] `stats --exclude <glob>`: ignore paths (e.g. lockfiles) when computing churn hotspots
 - [x] `stats --branch <name>`: analyze a specific branch or ref instead of HEAD
 - [x] `health`: flag very old unmerged branches separately from merely stale ones
-- [ ] `health --json`: machine-readable health report with per-check results
+- [x] `health --json`: machine-readable health report with per-check results
 - [ ] `health`: check for a test directory or test script as an optional check
 - [ ] `changelog --format json`: structured output grouped by version and type
 - [ ] `changelog`: honor `!` and `BREAKING CHANGE:` with a dedicated "Breaking changes" section
