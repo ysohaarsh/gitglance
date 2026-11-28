@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import {
   checkBasics,
   checkOptional,
+  findTests,
   checkSecrets,
   findSecretFiles,
   checkLargeFiles,
@@ -283,10 +284,34 @@ describe("optional checks", () => {
     writeFileSync(join(root, "CONTRIBUTING.md"), "x");
     mkdirSync(join(root, ".github"), { recursive: true });
     writeFileSync(join(root, ".github/SECURITY.md"), "x");
-    expect(checkOptional(root).map((c) => c.detail)).toEqual([
-      "CONTRIBUTING.md",
-      ".github/SECURITY.md",
-    ]);
+    expect(
+      checkOptional(root)
+        .slice(0, 2)
+        .map((c) => c.detail),
+    ).toEqual(["CONTRIBUTING.md", ".github/SECURITY.md"]);
+  });
+
+  it("detects a test directory or a real npm test script", () => {
+    const withDir = tmp();
+    mkdirSync(join(withDir, "tests"));
+    expect(findTests(withDir)).toBe("tests/");
+
+    const withScript = tmp();
+    writeFileSync(
+      join(withScript, "package.json"),
+      JSON.stringify({ scripts: { test: "vitest run" } }),
+    );
+    expect(findTests(withScript)).toBe("npm test (vitest run)");
+
+    const placeholder = tmp();
+    writeFileSync(
+      join(placeholder, "package.json"),
+      JSON.stringify({
+        scripts: { test: 'echo "Error: no test specified" && exit 1' },
+      }),
+    );
+    expect(findTests(placeholder)).toBeUndefined();
+    expect(findTests(tmp())).toBeUndefined();
   });
 
   it("reports missing files as WARN without affecting the score", () => {

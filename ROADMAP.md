@@ -71,7 +71,7 @@ Tasks are done top to bottom, one per day. Edit freely to steer the project.
 - [x] `stats --branch <name>`: analyze a specific branch or ref instead of HEAD
 - [x] `health`: flag very old unmerged branches separately from merely stale ones
 - [x] `health --json`: machine-readable health report with per-check results
-- [ ] `health`: check for a test directory or test script as an optional check
+- [x] `health`: check for a test directory or test script as an optional check
 - [ ] `changelog --format json`: structured output grouped by version and type
 - [ ] `changelog`: honor `!` and `BREAKING CHANGE:` with a dedicated "Breaking changes" section
 - [ ] `summary --since <date>`: alternative to `--days` for choosing the summary range

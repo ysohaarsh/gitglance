@@ -156,6 +156,7 @@ FAIL  TODO/FIXME      12 in 5 files: src/health.ts (4), JOURNAL.md (3), README.m
 PASS  Secrets         no secrets-like files tracked
 WARN  CONTRIBUTING    not found (optional)
 WARN  SECURITY        not found (optional)
+PASS  Tests           tests/
 7/8 checks passed
 Score: 83/100
 Points lost:

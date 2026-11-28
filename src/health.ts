@@ -1,4 +1,4 @@
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { plain, type Painter } from "./color.js";
 import { runGit } from "./git.js";
@@ -42,7 +42,29 @@ export function checkBasics(root: string): HealthCheck[] {
   }));
 }
 
-/** Optional community files: CONTRIBUTING and SECURITY (root, .github or docs). */
+const TEST_DIRS = ["test", "tests", "__tests__", "spec", "specs"];
+
+/** A test directory, or a package.json "test" script that is not the npm placeholder. */
+export function findTests(root: string): string | undefined {
+  const dir = TEST_DIRS.find((d) => existsSync(join(root, d)));
+  if (dir) return `${dir}/`;
+  try {
+    const pkg = JSON.parse(
+      readFileSync(join(root, "package.json"), "utf8"),
+    ) as {
+      scripts?: Record<string, unknown>;
+    };
+    const script = pkg.scripts?.test;
+    if (typeof script === "string" && !/no test specified/i.test(script)) {
+      return `npm test (${script})`;
+    }
+  } catch {
+    // no readable package.json: nothing to find
+  }
+  return undefined;
+}
+
+/** Optional checks: CONTRIBUTING, SECURITY (root, .github or docs) and tests. */
 export function checkOptional(root: string): HealthCheck[] {
   const find = (pattern: RegExp): string | undefined => {
     for (const dir of ["", ".github", "docs"]) {
@@ -56,6 +78,7 @@ export function checkOptional(root: string): HealthCheck[] {
   const found: [string, string | undefined][] = [
     ["CONTRIBUTING", find(/^contributing(\.[a-z]+)?$/i)],
     ["SECURITY", find(/^security(\.[a-z]+)?$/i)],
+    ["Tests", findTests(root)],
   ];
   return found.map(([name, file]) => ({
     name,

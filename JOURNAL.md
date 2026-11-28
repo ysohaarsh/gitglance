@@ -303,3 +303,9 @@ Daily log of what was built, decisions made, and what's next.
 - Done: `health --json` prints a machine-readable report (`score`, `passed`, `total`, per-check `name`/`passed`/`detail`/`optional`, and `deductions`). New `buildHealthReport` in `src/health.ts`; the text output is unchanged. Test covers optional checks being unscored and JSON round-tripping; README documents it.
 - Decisions: optional is always a boolean in JSON for a stable shape; works together with `--fail-under` (exit code still applies); no new dependencies.
 - Next: `health`: check for a test directory or test script as an optional check.
+
+## 2026-11-28
+
+- Done: `health` now has an optional "Tests" check. New `findTests` in `src/health.ts` passes when a `test`/`tests`/`__tests__`/`spec`/`specs` directory exists or `package.json` has a `test` script other than the npm placeholder. It is optional, so it shows as WARN when missing and never affects the score. Tests cover directory, real script, placeholder script and empty repo; README example updated.
+- Decisions: reused `checkOptional` so no wiring changes; no new dependencies.
+- Next: `changelog --format json`.
